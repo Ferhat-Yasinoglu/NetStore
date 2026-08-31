@@ -242,8 +242,11 @@ PAGES.dashboard = function () {
     })
   ].join('');
 
+  /* Ayarlardaki "Gecikme Uyarısı" kapalıysa (vade gününde) boş döner. */
+  const soon = dueSoonSales();
+
   let alerts = '';
-  if (lateCount || k.lowCount) {
+  if (lateCount || soon.length || k.lowCount) {
     const parts = [];
     if (lateCount) parts.push(
       '<div class="alert alert-danger">' + icon('alert') +
@@ -251,6 +254,17 @@ PAGES.dashboard = function () {
       '<span class="alert-text">' +
         esc(t('al_late_text', { v: money(openBal.reduce((s, r) => s + r.sum.overdue, 0)) })) + ' ' +
         t('al_late_link', { l:'<a href="#/borc" style="color:var(--danger);text-decoration:underline">' +
+          esc(t('nav_debt')) + '</a>' }) +
+      '</span></div></div>');
+    if (soon.length) parts.push(
+      '<div class="alert alert-warning">' + icon('clock') +
+      '<div><strong>' + esc(t('al_soon_title', { n:num(soon.length) })) + '</strong>' +
+      '<span class="alert-text">' +
+        esc(t('al_soon_text', {
+          d: num(setting('lateAlert')),
+          v: money(soon.reduce((s, x) => s + saleTotals(x).remaining, 0))
+        })) + ' ' +
+        t('al_late_link', { l:'<a href="#/borc" style="color:var(--warning);text-decoration:underline">' +
           esc(t('nav_debt')) + '</a>' }) +
       '</span></div></div>');
     if (k.lowCount) parts.push(
@@ -1049,12 +1063,15 @@ PAGES.ayarlar = function () {
         '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_business')) + '</h3>' +
         '<p class="sub">' + esc(t('h_business_sub')) + '</p></div></div>' +
         '<div class="card-body">' +
-          field(t('s_biz_name'), 'text', t('inv_biz_name')) +
-          field(t('s_tax_no'), 'text', 'AF-1234567890') +
-          field(t('f_phone'), 'tel', '+93 20 210 00 00') +
-          field(t('f_email'), 'email', 'info@netstore.af') +
-          '<div class="field"><label>' + esc(t('f_address')) + '</label><textarea>' +
-            esc(t('inv_biz_addr')) + '</textarea></div>' +
+          /* Ad ve adres kayıtlı değerle değil bizName/bizAddr ile doldurulur:
+             ayar boşken alanda dilin örnek adı görünür ve fatura ile ekran
+             aynı şeyi söyler. */
+          field(t('s_biz_name'), 'text', bizName(), 'set-bizName') +
+          field(t('s_tax_no'), 'text', setting('tax'), 'set-tax') +
+          field(t('f_phone'), 'tel', setting('phone'), 'set-phone') +
+          field(t('f_email'), 'email', setting('email'), 'set-email') +
+          '<div class="field"><label for="set-bizAddr">' + esc(t('f_address')) + '</label>' +
+            '<textarea id="set-bizAddr">' + esc(bizAddr()) + '</textarea></div>' +
         '</div></section>' +
 
         '<div class="grid" style="gap:16px;align-content:start">' +
@@ -1078,20 +1095,25 @@ PAGES.ayarlar = function () {
           '<div class="card-body">' +
             '<div class="field"><label>' + esc(t('s_currency')) + '</label>' +
             '<select><option selected>' + esc(t('s_currency_afn')) + '</option></select></div>' +
-            field(t('s_default_due'), 'number', '30') +
-            '<div class="field"><label>' + esc(t('s_late_alert')) + '</label><select>' +
-            '<option selected>' + esc(t('s_on_due')) + '</option><option>' + esc(t('s_3_before')) +
-            '</option><option>' + esc(t('s_7_before')) + '</option></select>' +
+            field(t('s_default_due'), 'number', setting('dueDays'), 'set-dueDays',
+                  { min: 0, step: 1 }) +
+            '<div class="field"><label for="set-lateAlert">' + esc(t('s_late_alert')) + '</label>' +
+            '<select id="set-lateAlert">' +
+              [[0, t('s_on_due')], [3, t('s_3_before')], [7, t('s_7_before')]].map(([d, l]) =>
+                '<option value="' + d + '"' + (setting('lateAlert') === d ? ' selected' : '') +
+                '>' + esc(l) + '</option>').join('') +
+            '</select>' +
             '<p class="hint">' + esc(t('s_late_hint')) + '</p></div>' +
           '</div></section>' +
 
           '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_stock_set')) + '</h3>' +
           '<p class="sub">' + esc(t('h_stock_set_sub')) + '</p></div></div>' +
           '<div class="card-body">' +
-            field(t('s_default_min'), 'number', '5') +
-            '<div class="field"><label>' + esc(t('s_alert_channel')) + '</label><select>' +
-            '<option selected>' + esc(t('s_in_app')) + '</option><option>' + esc(t('f_email')) +
-            '</option><option>WhatsApp</option></select></div>' +
+            /* "Uyarı kanalı" seçeneği kaldırıldı: uygulamanın e-posta ya da
+               WhatsApp gönderecek bir altyapısı yok, seçim hiçbir şey
+               değiştirmiyordu. Uyarılar uygulama içinde gösteriliyor. */
+            field(t('s_default_min'), 'number', setting('minStock'), 'set-minStock',
+                  { min: 0, step: 1 }) +
           '</div></section>' +
 
           cloudCard() +
@@ -1131,6 +1153,59 @@ PAGES.ayarlar = function () {
       '</div>'
   };
 };
+
+/**
+ * Ayarlar formunu okur, doğrular ve kalıcı hâle getirir.
+ *
+ * Doğrulama başarısızsa hiçbir alan uygulanmaz: yarısı kaydedilmiş bir
+ * ayar takımı, kullanıcının neyin geçtiğini bilememesi demektir.
+ */
+function saveSettingsForm() {
+  const val = function (id) {
+    const el = document.getElementById(id);
+    return el ? String(el.value).trim() : '';
+  };
+
+  const email = val('set-email');
+  /* Boş bırakılabilir, ama yazıldıysa biçimi tutmalı: hatalı adres sessizce
+     faturaya basılır ve kimse fark etmez. */
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    toast(t('v_email'), 'warning');
+    return;
+  }
+
+  const due = Number(val('set-dueDays'));
+  if (!isFinite(due) || due < 0) {
+    toast(t('v_number', { f: t('s_default_due') }), 'warning');
+    return;
+  }
+
+  const min = Number(val('set-minStock'));
+  if (!isFinite(min) || min < 0) {
+    toast(t('v_number', { f: t('s_default_min') }), 'warning');
+    return;
+  }
+
+  /* İşletme adı ve adresi dilin örnek değeriyle aynıysa boş kaydedilir:
+     kullanıcı dokunmamış demektir, dil değişince örnek de değişsin. */
+  const name = val('set-bizName');
+  const addr = val('set-bizAddr');
+
+  applySettings({
+    bizName:   name === t('inv_biz_name') ? '' : name,
+    bizAddr:   addr === t('inv_biz_addr') ? '' : addr,
+    tax:       val('set-tax'),
+    phone:     val('set-phone'),
+    email:     email,
+    dueDays:   due,
+    minStock:  min,
+    lateAlert: Number(val('set-lateAlert'))
+  });
+
+  saveSettings();
+  render();
+  toast(t('t_settings'));
+}
 
 /* Ayarlar > Ortak Defter kartı: kim girmiş, kaç kişi kullanıyor, çıkış. */
 function cloudCard() {
@@ -1190,9 +1265,15 @@ function installCard() {
     '</div></section>';
 }
 
-function field(label, type, value) {
-  return '<div class="field"><label>' + esc(label) + '</label>' +
-    '<input type="' + type + '" value="' + esc(value) + '"></div>';
+/* id verilirse alan okunabilir hâle gelir (bkz. saveSettingsForm). */
+function field(label, type, value, id, opts) {
+  const o = opts || {};
+  return '<div class="field">' +
+    '<label' + (id ? ' for="' + esc(id) + '"' : '') + '>' + esc(label) + '</label>' +
+    '<input type="' + type + '"' + (id ? ' id="' + esc(id) + '"' : '') +
+      (o.min !== undefined ? ' min="' + esc(o.min) + '"' : '') +
+      (o.step !== undefined ? ' step="' + esc(o.step) + '"' : '') +
+      ' value="' + esc(value) + '"></div>';
 }
 
 /* ==========================================================================
@@ -1488,7 +1569,7 @@ document.addEventListener('click', function (ev) {
     confirmModal({ message: t('cf_signout'), onConfirm: authSignOut });
     return;
   }
-  if (act === 'save-settings') { toast(t('t_settings')); return; }
+  if (act === 'save-settings') { saveSettingsForm(); return; }
   if (act === 'reset-data') {
     confirmModal({
       message: t('cf_reset'), note: t('cf_reset_note'),

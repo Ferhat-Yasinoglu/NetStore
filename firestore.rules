@@ -32,7 +32,9 @@ service cloud.firestore {
     }
 
     /* Ortak defter: ürünler, müşteriler, personel, satışlar, tahsilatlar,
-       alışlar. İzinli hesaplar tam yetkilidir. */
+       alışlar ve işletme ayarları (meta/settings). İzinli hesaplar tam
+       yetkilidir. Alt yollar {belge=**} ile kapsandığı için yeni bir
+       koleksiyon eklendiğinde bu kuralı değiştirmek gerekmez. */
     match /shops/{shopId}/{belge=**} {
       allow read, write: if izinli();
     }

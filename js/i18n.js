@@ -260,6 +260,8 @@ const I18N = {
   al_late_title:   { tr:'{n} fatura gecikmiş durumda', en:'{n} invoices are overdue', fa:'{n} فاکتور معوق است' },
   al_late_text:    { tr:'Vadesi geçen toplam alacak {v}.', en:'Total past-due receivable {v}.', fa:'مجموع طلب گذشته از سررسید {v}.' },
   al_late_link:    { tr:'{l} sayfasından takip edin.', en:'Track it on the {l} page.', fa:'از صفحهٔ {l} پیگیری کنید.' },
+  al_soon_title:   { tr:'{n} faturanın vadesi yaklaşıyor', en:'{n} invoices are due soon', fa:'سررسید {n} فاکتور نزدیک است' },
+  al_soon_text:    { tr:'{d} gün içinde toplam {v} tahsil edilmeli.', en:'{v} to be collected within {d} days.', fa:'مبلغ {v} باید ظرف {d} روز دریافت شود.' },
   al_low_title:    { tr:'{n} üründe stok kritik seviyede', en:'{n} items at critical stock level', fa:'موجودی {n} جنس در سطح بحرانی است' },
   al_low_more:     { tr:'ve {n} ürün daha',    en:'and {n} more items',  fa:'و {n} جنس دیگر' },
   al_low_link:     { tr:'{l} sayfasına gidin.', en:'Go to the {l} page.', fa:'به صفحهٔ {l} بروید.' },
@@ -347,8 +349,6 @@ const I18N = {
   s_7_before:      { tr:'7 gün önce',          en:'7 days before',       fa:'۷ روز قبل' },
   s_late_hint:     { tr:'Vadesi yaklaşan faturalar dashboard\'da turuncu uyarı olarak gösterilir.', en:'Invoices approaching their due date appear as an orange alert on the dashboard.', fa:'فاکتورهای نزدیک به سررسید در داشبورد به‌صورت هشدار نارنجی نمایش داده می‌شوند.' },
   s_default_min:   { tr:'Varsayılan Minimum Stok', en:'Default Minimum Stock', fa:'حداقل موجودی پیش‌فرض' },
-  s_alert_channel: { tr:'Uyarı Kanalı',        en:'Alert Channel',       fa:'کانال هشدار' },
-  s_in_app:        { tr:'Uygulama içi',        en:'In-app',              fa:'داخل برنامه' },
   s_language:      { tr:'Uygulama Dili',       en:'Application Language', fa:'زبان برنامه' },
   s_lang_hint:     { tr:'Seçilen dil arayüzün tamamını, faturaları ve fişleri kapsar.', en:'The selected language applies to the whole interface, invoices and receipts.', fa:'زبان انتخاب‌شده تمام رابط کاربری، فاکتورها و رسیدها را در بر می‌گیرد.' },
 
@@ -428,6 +428,7 @@ const I18N = {
   v_stock_short:   { tr:'“{p}” için yeterli stok yok (mevcut {n}).', en:'Not enough stock for “{p}” (available {n}).', fa:'موجودی «{p}» کافی نیست (موجود {n}).' },
   v_prepay_max:    { tr:'Peşin tahsilat toplamı aşamaz.', en:'Upfront payment cannot exceed the total.', fa:'پرداخت نقدی نمی‌تواند از مجموع بیشتر باشد.' },
   v_sku_dup:       { tr:'“{n}” stok kodu zaten kullanılıyor.', en:'SKU “{n}” is already in use.', fa:'کد جنس «{n}» قبلاً استفاده شده است.' },
+  v_email:         { tr:'Geçerli bir e-posta adresi girin.', en:'Enter a valid e-mail address.', fa:'یک نشانی ایمیل معتبر وارد کنید.' },
 
   /* --- başarı bildirimleri --- */
   ok_sale:         { tr:'{no} numaralı satış oluşturuldu.', en:'Sale {no} created.', fa:'فروش {no} ایجاد شد.' },

@@ -114,6 +114,10 @@ function cloudStop() {
 
   const c = collections();
   Object.keys(c).forEach(function (k) { c[k].length = 0; });
+
+  /* Ayarlar da defterin bir parçası: çıkış yapan hesabın dükkânına ait
+     işletme bilgileri bellekte kalmasın. */
+  resetSettings();
 }
 
 /* --------------------------------------------------------------------------
@@ -122,6 +126,12 @@ function cloudStop() {
 
 function colPath(key) {
   return 'shops/' + SHOP_ID + '/' + key;
+}
+
+/* İşletme ayarları tek belgede durur: kayıt değil tercih oldukları için
+   çakışma riski yok, biri değiştirdiğinde diğerinin görmesi yeterli. */
+function settingsPath() {
+  return 'shops/' + SHOP_ID + '/meta/settings';
 }
 
 function cloudSubscribe(cb) {
@@ -174,6 +184,44 @@ function cloudSubscribe(cb) {
     );
     CLOUD.unsubs.push(unsub);
   });
+
+  cloudSubscribeSettings(cb);
+}
+
+/**
+ * İşletme ayarlarını dinler.
+ *
+ * Defterin hazır sayılması bu belgeye bağlanmaz: ayarlar hiç yazılmamış
+ * olabilir ve o zaman uygulama varsayılanlarla gayet çalışır. Okuma hatası
+ * da uygulamayı kilitlemez — kayıtlar geliyorsa ayarların gelmemesi
+ * "erişimin yok" demek değildir.
+ */
+function cloudSubscribeSettings(cb) {
+  const unsub = FB.onSnapshot(
+    FB.doc(CLOUD.db, settingsPath()),
+    function (snap) {
+      /* Belge yoksa data() undefined döner; normalizeSettings varsayılana çevirir. */
+      applySettings(snap.data());
+      /* İlk yüklemede çizimi cloudSubscribe yönetir; sonrasında karşı
+         taraftan gelen değişikliği ekrana yansıtmak bize düşer. */
+      if (CLOUD.ready) cb.onData();
+    },
+    function () { resetSettings(); }
+  );
+  CLOUD.unsubs.push(unsub);
+}
+
+/** Ayarları buluta yazar. Firestore çevrimdışıyken isteği kuyruğa alır. */
+function cloudSaveSettings() {
+  if (!cloudActive()) return false;
+
+  const batch = FB.writeBatch(CLOUD.db);
+  batch.set(FB.doc(CLOUD.db, settingsPath()), Object.assign({}, SETTINGS));
+  batch.commit().catch(function (err) {
+    CLOUD.error = err && err.code ? err.code : 'write-failed';
+    if (typeof toast === 'function') toast(t('cl_write_failed'), 'warning');
+  });
+  return true;
 }
 
 /** Gelen belgeleri bellekteki diziye uygular ve imzaları tazeler. */
