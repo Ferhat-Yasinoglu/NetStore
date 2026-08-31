@@ -168,7 +168,12 @@ function resetToDemo() {
    -------------------------------------------------------------------------- */
 
 function exportBackup() {
-  const blob = new Blob([JSON.stringify(serialize(), null, 2)],
+  /* Ayarlar defterin bir parçası değil (ayrı yerde durur, bkz. settings.js)
+     ama yedeğin içinde gitmeli: yedekten dönen kişi fatura başlığını ve
+     varsayılanları tekrar doldurmak zorunda kalmasın. */
+  const snap = Object.assign(serialize(), { settings: Object.assign({}, SETTINGS) });
+
+  const blob = new Blob([JSON.stringify(snap, null, 2)],
                         { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -201,6 +206,11 @@ function importBackup() {
          buluta gider — tek bir yol iki modu da kapsar. */
       applySnapshot(obj);
       saveData();
+
+      /* Ayarlar yedekte varsa uygulanır. Eski yedeklerde bu alan yok;
+         o zaman yürürlükteki ayarlara dokunmuyoruz. */
+      if (obj.settings) { applySettings(obj.settings); saveSettings(); }
+
       render();
       toast(t('st_import_done', { n: num(storageInfo().records) }));
     };
@@ -220,5 +230,6 @@ function importBackup() {
  */
 function initStore() {
   captureSeed();
+  loadSettingsLocal();              // kayıt yoksa varsayılanlarla kalır
   if (!loadData()) saveData();      // ilk açılış: örnek veri kaydedilir
 }

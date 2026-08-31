@@ -5,11 +5,8 @@
    Yazdırıldığında yalnızca belge basılır, arayüz basılmaz.
    ========================================================================== */
 
-const BIZ = {
-  phone: '+93 20 210 00 00',
-  email: 'info@netstore.af',
-  tax:   'AF-1234567890'
-};
+/* İşletme bilgileri (ad, adres, vergi no, telefon, e-posta) artık burada
+   sabit değil: Ayarlar sayfasından girilir ve js/settings.js'te durur. */
 
 function docHost() { return document.getElementById('docHost'); }
 
@@ -43,9 +40,10 @@ function sheetHeader(docTitle, meta) {
       '<div class="sheet-brand">' +
         '<img class="sheet-mark" src="icons/logo-128.png" alt="">' +
         '<div>' +
-          '<div class="sheet-biz">' + esc(t('inv_biz_name')) + '</div>' +
-          '<div class="sheet-biz-sub">' + esc(t('inv_biz_addr')) + '</div>' +
-          '<div class="sheet-biz-sub">' + ltr(BIZ.phone) + ' · ' + ltr(BIZ.email) + '</div>' +
+          '<div class="sheet-biz">' + esc(bizName()) + '</div>' +
+          '<div class="sheet-biz-sub">' + esc(bizAddr()) + '</div>' +
+          '<div class="sheet-biz-sub">' + ltr(setting('phone')) + ' · ' +
+            ltr(setting('email')) + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="sheet-meta">' +
@@ -106,10 +104,10 @@ function invoiceDoc(saleId) {
 
     '<div class="sheet-parties">' +
       partyBlock(t('inv_seller'), [
-        esc(t('inv_biz_name')),
-        esc(t('inv_biz_addr')),
-        esc(t('inv_tax')) + ': ' + ltr(BIZ.tax),
-        ltr(BIZ.phone)
+        esc(bizName()),
+        esc(bizAddr()),
+        esc(t('inv_tax')) + ': ' + ltr(setting('tax')),
+        ltr(setting('phone'))
       ]) +
       partyBlock(t('inv_buyer'), [
         esc(customerName(c)),
@@ -176,7 +174,7 @@ function receiptDoc(paymentId) {
     ]) +
 
     '<div class="sheet-parties">' +
-      partyBlock(t('inv_seller'), [esc(t('inv_biz_name')), esc(t('inv_biz_addr')), ltr(BIZ.phone)]) +
+      partyBlock(t('inv_seller'), [esc(bizName()), esc(bizAddr()), ltr(setting('phone'))]) +
       partyBlock(t('inv_buyer'),  [esc(customerName(c)), esc(L(c.addr)), ltr(c.phone)]) +
     '</div>' +
 
