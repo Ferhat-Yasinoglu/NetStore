@@ -1147,7 +1147,12 @@ PAGES.ayarlar = function () {
           '<p class="sub">' + esc(t('h_danger_sub')) + '</p></div></div>' +
           '<div class="card-body"><div class="action-row">' +
             '<button class="btn btn-danger" data-act="reset-data">' + icon('refresh') + t('btn_reset_data') + '</button>' +
-            '<button class="btn btn-danger" data-act="delete-account">' + icon('trash') + t('btn_del_account') + '</button>' +
+            /* Yerel modda ortada bir hesap yok: kayıtlar yalnızca bu
+               telefonda duruyor, silinecek bir kimlik kaydı da yok. */
+            (cloudInfo().mode === 'cloud'
+              ? '<button class="btn btn-danger" data-act="delete-account">' +
+                  icon('trash') + t('btn_del_account') + '</button>'
+              : '') +
           '</div></div></section>' +
         '</div>' +
       '</div>'
@@ -1205,6 +1210,36 @@ function saveSettingsForm() {
   saveSettings();
   render();
   toast(t('t_settings'));
+}
+
+/**
+ * "Hesabı Sil" — giriş yapan hesabın Firebase kimlik kaydını siler.
+ *
+ * Ortak defter silinmez: kayıtlar dükkâna ait, diğer kullanıcı görmeye
+ * devam eder. Onay metni ne olup ne olmadığını açıkça yazar.
+ */
+function deleteAccount() {
+  confirmModal({
+    message: t('cf_del_account'),
+    note: t('cf_del_account_note'),
+    onConfirm: function () {
+      cloudDeleteAccount()
+        .then(function () {
+          /* onAuthStateChanged devralır ve giriş ekranını açar. */
+          toast(t('t_account_deleted'));
+        })
+        .catch(function (err) {
+          const code = (err && err.code) || 'unknown';
+
+          /* Firebase taze oturum ister. Kullanıcı ne yapacağını bilsin. */
+          if (code === 'auth/requires-recent-login') {
+            toast(t('au_recent_login'), 'warning');
+            return;
+          }
+          toast(t('au_delete_failed', { e: code }), 'warning');
+        });
+    }
+  });
 }
 
 /* Ayarlar > Ortak Defter kartı: kim girmiş, kaç kişi kullanıyor, çıkış. */
@@ -1579,7 +1614,7 @@ document.addEventListener('click', function (ev) {
     });
     return;
   }
-  if (act === 'delete-account') { toast(t('t_danger'), 'warning'); return; }
+  if (act === 'delete-account') { deleteAccount(); return; }
 });
 
 /* kalem miktarı doğrudan alandan değişir */
