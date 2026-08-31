@@ -583,7 +583,10 @@ const I18N = {
 let LANG = (function () {
   const saved = localStorage.getItem(LANG_KEY);
   if (saved && LANGS[saved]) return saved;
-  const nav = (navigator.language || 'fa').slice(0, 2).toLowerCase();
+  /* Tarayıcı 'fa-AF', 'prs-AF', 'tr_TR' gibi etiketler verir; bölge ekini
+     atıp yalnızca dil kodunu karşılaştırıyoruz. Baştan iki harf kesmek
+     üç harfli 'prs' kodunu hiçbir zaman eşleştiremiyordu. */
+  const nav = (navigator.language || 'fa').toLowerCase().split(/[-_]/)[0];
   if (nav === 'fa' || nav === 'ps' || nav === 'prs') return 'fa';
   if (nav === 'tr') return 'tr';
   return 'en';

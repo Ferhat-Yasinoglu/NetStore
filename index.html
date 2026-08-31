@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<!-- lang/dir yalnızca başlangıç değeridir: aşağıdaki i18n betiği, sayfa
+     boyanmadan önce bunları kullanıcının seçtiği dile göre günceller. -->
+<html lang="tr" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,6 +18,12 @@
   <meta name="apple-mobile-web-app-title" content="NetStore" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" type="image/png" href="icons/favicon-64.png" />
+
+  <!-- Dil katmanı gövdeden ÖNCE yüklenir: seçili dil ve yazı yönü ilk boyama
+       başlamadan uygulansın diye. Aksi halde Farsça/Dari kullanıcıda sayfa
+       bir an LTR çizilip sonra RTL'ye dönüyordu. -->
+  <script src="js/i18n.js"></script>
+  <script>applyLangToDocument();</script>
 </head>
 <body>
 
@@ -94,7 +102,7 @@
   <!-- Ortak modda giriş yapılmadan uygulama çizilmez; ekran buraya açılır. -->
   <div class="auth-host" id="authHost" role="dialog" aria-modal="true"></div>
 
-  <script src="js/i18n.js"></script>
+  <!-- js/i18n.js <head> içinde yüklendi. -->
   <script src="js/pwa.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/data.js"></script>
