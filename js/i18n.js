@@ -320,7 +320,7 @@ const I18N = {
   t_bad_amount:    { tr:'Geçerli bir tutar girin.', en:'Enter a valid amount.', fa:'مبلغ معتبر وارد کنید.' },
   t_saved:         { tr:'{v} tahsilat kaydedildi.', en:'Payment of {v} recorded.', fa:'دریافتی {v} ثبت شد.' },
   t_settings:      { tr:'Ayarlar kaydedildi.', en:'Settings saved.',     fa:'تنظیمات ذخیره شد.' },
-  t_danger:        { tr:'Tehlikeli işlem — onay adımı gerekiyor.', en:'Dangerous action — confirmation required.', fa:'عملیات خطرناک — نیاز به تأیید دارد.' },
+  t_account_deleted: { tr:'Hesap kaydı silindi.', en:'Account record deleted.', fa:'سابقهٔ حساب حذف شد.' },
 
 
   /* ---------------- boş durumlar ---------------- */
@@ -492,6 +492,10 @@ const I18N = {
   au_other:        { tr:'Başka hesapla gir',     en:'Use another account',  fa:'با حساب دیگر وارد شوید' },
   au_signout:      { tr:'Çıkış yap',             en:'Sign out',             fa:'خروج' },
   cf_signout:      { tr:'Çıkış yapılsın mı? Kayıtlar ortak defterde durur, silinmez.', en:'Sign out? Your records stay in the shared ledger.', fa:'خارج می‌شوید؟ رکوردها در دفتر مشترک باقی می‌ماند.' },
+  cf_del_account:  { tr:'Google hesabınızın bu uygulamadaki kimlik kaydı silinecek ve çıkış yapılacak.', en:'Your Google account’s sign-in record for this app will be deleted and you will be signed out.', fa:'سابقهٔ ورود حساب گوگل شما در این برنامه حذف می‌شود و از حساب خارج می‌شوید.' },
+  cf_del_account_note: { tr:'Ortak defter ve kayıtlar SİLİNMEZ — diğer kullanıcı görmeye devam eder. Bu hesabın bir daha girememesi için adresin Firebase kurallarından çıkarılması gerekir.', en:'The shared ledger and its records are NOT deleted — the other user keeps seeing them. To stop this account from signing in again, its address must be removed from the Firebase rules.', fa:'دفتر مشترک و رکوردها حذف نمی‌شوند — کاربر دیگر همچنان آن‌ها را می‌بیند. برای اینکه این حساب دوباره وارد نشود، باید نشانی آن از قوانین Firebase حذف شود.' },
+  au_recent_login: { tr:'Güvenlik için taze bir oturum gerekiyor: çıkış yapıp yeniden girin, sonra tekrar deneyin.', en:'A recent sign-in is required: sign out, sign in again, then retry.', fa:'برای امنیت، ورود تازه لازم است: خارج شوید، دوباره وارد شوید و سپس دوباره تلاش کنید.' },
+  au_delete_failed:{ tr:'Hesap silinemedi ({e}).',  en:'Could not delete the account ({e}).', fa:'حساب حذف نشد ({e}).' },
 
   h_cloud:         { tr:'Ortak Defter',          en:'Shared Ledger',        fa:'دفتر مشترک' },
   h_cloud_sub:     { tr:'Kayıtlar iki telefonda da aynı', en:'Records stay the same on both phones', fa:'رکوردها در هر دو موبایل یکسان می‌ماند' },

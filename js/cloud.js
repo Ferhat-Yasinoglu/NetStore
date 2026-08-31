@@ -344,6 +344,31 @@ function cloudSignOut() {
   return FB.signOut(CLOUD.auth);
 }
 
+/**
+ * Giriş yapan hesabın Firebase kimlik kaydını siler.
+ *
+ * ORTAK DEFTERE DOKUNMAZ. Kayıtlar dükkâna aittir, tek bir kişiye değil;
+ * silmek diğer kullanıcının verisini de yok ederdi.
+ *
+ * Kimin girebildiğini Firestore kuralları belirler ve onlar konsolda durur
+ * (bkz. firestore.rules). Bu yüzden kimlik kaydını silmek kalıcı bir
+ * engelleme DEĞİLDİR: adres kurallardan çıkarılmadıkça aynı hesapla tekrar
+ * girilebilir, o zaman yeni bir kimlik kaydı oluşur. Onay metni bunu
+ * olduğu gibi söylüyor.
+ *
+ * Firebase, hesap silmek için taze bir oturum ister; kimlik belgesi
+ * eskiyse 'auth/requires-recent-login' döner.
+ */
+function cloudDeleteAccount() {
+  if (!CLOUD.user || typeof CLOUD.user.delete !== 'function') {
+    return Promise.reject({ code: 'no-user' });
+  }
+  /* Dinleyiciler burada kapatılmaz: silme başarısız olursa (taze oturum
+     istenmesi en olağan sebep) uygulama hiç bozulmadan yerinde kalsın.
+     Silme başarılıysa onAuthStateChanged devreye girip cloudStop() çağırır. */
+  return CLOUD.user.delete();
+}
+
 /** Ayarlar sayfasında gösterilen durum bilgisi. */
 function cloudInfo() {
   if (!cloudEnabled()) return { mode: 'local' };
