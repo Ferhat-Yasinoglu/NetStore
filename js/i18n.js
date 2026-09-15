@@ -49,6 +49,10 @@ const I18N = {
   aria_menu_open:  { tr:'Menüyü aç',           en:'Open menu',           fa:'باز کردن منو' },
   aria_menu_close: { tr:'Menüyü kapat',        en:'Close menu',          fa:'بستن منو' },
   aria_lang:       { tr:'Dil seç',             en:'Select language',     fa:'انتخاب زبان' },
+  aria_theme:      { tr:'Koyu / aydınlık tema', en:'Dark / light theme', fa:'پوستهٔ تیره / روشن' },
+  th_dark:         { tr:'Koyu tema',           en:'Dark theme',          fa:'پوستهٔ تیره' },
+  th_light:        { tr:'Aydınlık tema',       en:'Light theme',         fa:'پوستهٔ روشن' },
+  th_switched:     { tr:'{m} açıldı',          en:'{m} enabled',         fa:'{m} فعال شد' },
   aria_back:       { tr:'Geri',                en:'Back',                fa:'بازگشت' },
   aria_close:      { tr:'Kapat',               en:'Close',               fa:'بستن' },
 
@@ -185,6 +189,13 @@ const I18N = {
   h_trend_sub:     { tr:'Son 12 ay · aylık toplam', en:'Last 12 months · monthly total', fa:'۱۲ ماه اخیر · مجموع ماهانه' },
   h_collection:    { tr:'Tahsilat Durumu',     en:'Collection Status',   fa:'وضعیت دریافتی' },
   h_collection_sub:{ tr:'Toplam ciroya göre',  en:'Against total revenue', fa:'نسبت به کل گردش' },
+  g_collected:     { tr:'TAHSİL EDİLDİ',       en:'COLLECTED',           fa:'دریافت‌شده' },
+  h_pulse:         { tr:'Günün Özeti',         en:'Today at a Glance',   fa:'خلاصهٔ امروز' },
+  h_pulse_sub:     { tr:'Defterin şu anki durumu', en:'Where the books stand right now', fa:'وضعیت فعلی دفتر' },
+  pu_customers:    { tr:'Müşteri',             en:'Customers',           fa:'مشتری' },
+  pu_products:     { tr:'Ürün',                en:'Products',            fa:'جنس' },
+  pu_open_inv:     { tr:'Açık fatura',         en:'Open invoices',       fa:'فاکتور باز' },
+  pu_avg_basket:   { tr:'Ortalama sepet',      en:'Average basket',      fa:'میانگین سبد' },
   h_by_category:   { tr:'Kategori Bazlı Ciro', en:'Revenue by Category', fa:'گردش بر اساس دسته' },
   h_category_rev:  { tr:'Kategori Cirosu',     en:'Category Revenue',    fa:'گردش دسته‌ها' },
   h_recent_sales:  { tr:'Son Satışlar',        en:'Recent Sales',        fa:'فروشات اخیر' },
@@ -442,6 +453,10 @@ const I18N = {
 
   cf_reset:        { tr:'Tüm veriler örnek veri setine döndürülecek.', en:'All data will be reset to the sample dataset.', fa:'همهٔ داده‌ها به مجموعهٔ نمونه بازگردانده می‌شود.' },
   cf_reset_note:   { tr:'Bu oturumda eklediğiniz kayıtlar kaybolur.', en:'Records you added in this session will be lost.', fa:'رکوردهایی که در این نشست افزوده‌اید از بین می‌رود.' },
+
+  /* --- görünüm ayarı --- */
+  s_theme:         { tr:'Görünüm',              en:'Appearance',          fa:'ظاهر' },
+  s_theme_hint:    { tr:'Koyu ya da aydınlık; seçim bu cihazda saklanır.', en:'Dark or light; the choice is kept on this device.', fa:'تیره یا روشن؛ انتخاب روی همین دستگاه می‌ماند.' },
 
   /* --- takvim ayarı --- */
   s_calendar:      { tr:'Takvim',               en:'Calendar',            fa:'تقویم' },

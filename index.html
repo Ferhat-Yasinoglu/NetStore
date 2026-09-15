@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0B1120" />
+  <meta name="theme-color" content="#070B16" />
   <meta name="description" content="NetStore — stok, satış, müşteri, borç ve tahsilat yönetim paneli" />
   <title>NetStore</title>
   <link rel="stylesheet" href="css/netstore.css" />
@@ -19,13 +19,24 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" type="image/png" href="icons/favicon-64.png" />
 
-  <!-- Dil katmanı gövdeden ÖNCE yüklenir: seçili dil ve yazı yönü ilk boyama
-       başlamadan uygulansın diye. Aksi halde Farsça/Dari kullanıcıda sayfa
-       bir an LTR çizilip sonra RTL'ye dönüyordu. -->
+  <!-- Dil ve tema katmanları gövdeden ÖNCE yüklenir: seçili dil, yazı yönü
+       ve renk teması ilk boyama başlamadan uygulansın diye. Aksi halde
+       Farsça/Dari kullanıcıda sayfa bir an LTR çizilip sonra RTL'ye,
+       aydınlık tema seçende de bir an koyu çizilip sonra beyaza dönüyordu. -->
   <script src="js/i18n.js"></script>
-  <script>applyLangToDocument();</script>
+  <script src="js/theme.js"></script>
+  <script>applyLangToDocument(); applyThemeToDocument();</script>
 </head>
 <body>
+
+  <!-- Zemin: yavaşça sürüklenen ışık lekeleri + ince ızgara.
+       Tamamen süsleme; ekran okuyucudan gizli, tıklamayı geçirir. -->
+  <div class="aurora" aria-hidden="true">
+    <span class="aurora-blob a1"></span>
+    <span class="aurora-blob a2"></span>
+    <span class="aurora-blob a3"></span>
+    <span class="aurora-grid"></span>
+  </div>
 
   <div class="app">
 
@@ -79,6 +90,10 @@
             <div class="search-panel" id="searchPanel"></div>
           </div>
           <div id="langSwitch"></div>
+          <button class="icon-btn theme-btn" id="btnTheme" data-act="toggle-theme">
+            <span class="theme-ico ico-sun" data-icon="sun"></span>
+            <span class="theme-ico ico-moon" data-icon="moon"></span>
+          </button>
           <button class="icon-btn" id="btnNotif">
             <span data-icon="bell"></span>
             <span class="dot"></span>
@@ -87,6 +102,7 @@
             <span data-icon="info"></span>
           </button>
         </div>
+        <span class="scroll-bar" id="scrollBar" aria-hidden="true"></span>
       </header>
 
       <main class="page" id="page"></main>
@@ -102,7 +118,7 @@
   <!-- Ortak modda giriş yapılmadan uygulama çizilmez; ekran buraya açılır. -->
   <div class="auth-host" id="authHost" role="dialog" aria-modal="true"></div>
 
-  <!-- js/i18n.js <head> içinde yüklendi. -->
+  <!-- js/i18n.js ve js/theme.js <head> içinde yüklendi. -->
   <script src="js/pwa.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/data.js"></script>
@@ -115,6 +131,7 @@
   <script src="js/cloud.js"></script>
   <script src="js/auth.js"></script>
 
+  <script src="js/motion.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/invoice.js"></script>
   <script src="js/forms.js"></script>
