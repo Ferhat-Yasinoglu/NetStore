@@ -140,10 +140,47 @@
 
   <script>
     /* Servis çalışanı yalnızca https:// veya localhost üzerinde çalışır;
-       dosyadan (file://) açıldığında sessizce atlanır. */
+       dosyadan (file://) açıldığında sessizce atlanır.
+
+       Kendini tazeleme ZORUNLU: önbellek önce servis edildiği için, hatalı
+       bir sürüm yayınlandığında telefondaki kopya o sürümde TAKILI KALIYOR.
+       Kullanıcının elinde önbelleği temizlemekten başka çıkış yolu olmuyor.
+       Bu yüzden yeni servis çalışanı devri aldığında sayfa bir kez
+       tazeleniyor; ayrıca uygulama açık kaldığı sürece saatte bir yeni
+       sürüm sorgulanıyor. */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
+        /* İlk kurulumda tazelemeye gerek yok: açık olan kabuk zaten ağdan
+           yeni geldi. Ama bayrak SABİT tutulamaz — sayfa açıkken ilk kurulum
+           tamamlanır, ardından gerçek bir güncelleme gelirse onu da kaçırırdık.
+           Bu yüzden devir tesliminde denetleyicinin O ANDAKİ durumuna bakılır
+           ve ilk kurulum bir kez işaretlenip geçilir. */
+        var ilkKurulumGecildi = !!navigator.serviceWorker.controller;
+        var tazelendi = false;
+
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (tazelendi) return;
+          if (!ilkKurulumGecildi) { ilkKurulumGecildi = true; return; }
+          tazelendi = true;
+
+          /* Form ya da belge açıkken tazelemek kullanıcının yazdığını siler;
+             o durumda yalnız haber verilir, yeni sürüm sonraki açılışta gelir. */
+          var modal = document.getElementById('modalHost');
+          var mesgul = document.body.classList.contains('doc-open') ||
+            (modal && modal.classList.contains('on'));
+          if (mesgul) {
+            if (typeof toast === 'function' && typeof t === 'function') toast(t('pw_updated'), 'info');
+            return;
+          }
+          location.reload();
+        });
+
         navigator.serviceWorker.register('sw.js', { scope: './' })
+          .then(function (reg) {
+            if (!reg) return;
+            reg.update();
+            setInterval(function () { reg.update(); }, 3600000);
+          })
           .catch(function () { /* çevrimdışı desteği yok — uygulama yine de çalışır */ });
       });
     }
