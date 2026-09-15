@@ -10,7 +10,7 @@
    sonra CACHE sabitindeki numarayı artırmak yeterlidir.
    ========================================================================== */
 
-const CACHE = 'netstore-v17';
+const CACHE = 'netstore-v18';
 
 /* Uygulama kabuğu — hepsi kuruluşta indirilir. */
 const SHELL = [

@@ -1348,33 +1348,45 @@ function cloudCard() {
 function installCard() {
   const st = installState();
   const off = offlineState();
+  const mode = runMode();
 
-  const head = st === 'installed' ? t('pw_installed')
-    : st === 'ready' ? t('pw_install')
-    : t('pw_manual');
-  const sub = st === 'installed' ? t('pw_installed_sub')
-    : st === 'ready' ? t('pw_ready_sub')
-    : t('pw_manual_and') + ' ' + t('pw_manual_ios');
+  /* ÖNCE "şu an nasıl çalışıyorum" — kurulum tavsiyesinden önce gelir.
+     Ana ekrana yer imi eklenmiş bir kopya kendini kurulu sanıyor ama
+     tarayıcıda açılıyordu; kullanıcının bunu görebileceği tek yer yoktu. */
+  const head = mode === 'app' ? t('pw_installed') : t('pw_in_browser');
+  const sub  = mode === 'app' ? t('pw_installed_sub') : t('pw_in_browser_sub');
 
   const offText = off === 'on' ? t('pw_offline_on')
     : off === 'wait' ? t('pw_offline_wait')
     : t('pw_offline_none');
 
+  /* Tarayıcıdayken ne yapılacağı: kurulum penceresi açılabiliyorsa düğme,
+     açılamıyorsa adım adım — ve her iki hâlde de yer imi ile kurulumu
+     ayırt etme ipucu. */
+  let action = '';
+  if (mode !== 'app') {
+    action = st === 'ready'
+      ? '<div class="action-row"><button class="btn btn-primary" data-act="install-app">' +
+        icon('install') + esc(t('pw_install')) + '</button></div>'
+      : '<p class="hint" style="margin:0 0 4px">' + esc(t('pw_manual_and')) + '</p>' +
+        '<p class="hint" style="margin:0">' + esc(t('pw_manual_ios')) + '</p>';
+  }
+
   return '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_app')) + '</h3>' +
     '<p class="sub">' + esc(t('h_app_sub')) + '</p></div></div>' +
     '<div class="card-body">' +
-      '<div class="alert alert-' + (st === 'installed' ? 'success' : 'info') + '" style="margin-bottom:14px">' +
-        icon(st === 'installed' ? 'check' : 'smartphone') +
+      '<div class="alert alert-' + (mode === 'app' ? 'success' : 'warning') + '" style="margin-bottom:14px">' +
+        icon(mode === 'app' ? 'check' : 'smartphone') +
         '<div><strong>' + esc(head) + '</strong>' +
         '<span class="alert-text">' + esc(sub) + '</span></div></div>' +
 
-      (st === 'ready'
-        ? '<div class="action-row"><button class="btn btn-primary" data-act="install-app">' +
-          icon('install') + esc(t('pw_install')) + '</button></div>'
+      action +
+
+      (mode !== 'app'
+        ? '<p class="hint" style="margin-top:12px">' + icon('info') + esc(t('pw_shortcut_tip')) + '</p>'
         : '') +
 
-      '<p class="hint" style="margin-top:' + (st === 'ready' ? '12px' : '0') + '">' +
-        esc(offText) + '</p>' +
+      '<p class="hint" style="margin-top:12px">' + esc(offText) + '</p>' +
     '</div></section>';
 }
 
