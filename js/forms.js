@@ -219,9 +219,38 @@ function lineRowsHTML() {
          '<b class="num">' + money(total) + '</b></footer>';
 }
 
+/** Listeyi baştan kurar. Yalnızca SATIR KÜMESİ değişince çağrılır. */
 function refreshLines() {
   const host = document.getElementById('lineHost');
   if (host) host.innerHTML = lineRowsHTML();
+}
+
+/**
+ * Yalnızca türetilmiş değerleri (satır tutarı ve genel toplam) yerinde
+ * günceller; listenin HTML'ini YENİDEN YAZMAZ.
+ *
+ * Miktar değişiminde refreshLines() çağrılamaz: yazılmakta olan
+ * <input class="line-qty"> DOM'dan koparılır, odak gövdeye düşer ve ikinci
+ * tuş vuruşu alana hiç ulaşmaz. Kullanıcı "62" yazarken defterde 6 kalıyor,
+ * fatura tutarı ve stok düşümü sessizce yanlış kaydediliyordu. Satır sayısı
+ * sabit kaldığı sürece yalnız iki metin düğümünü değiştirmek yeterli.
+ */
+function refreshLineTotals() {
+  const host = document.getElementById('lineHost');
+  if (!host) return;
+
+  let total = 0;
+  host.querySelectorAll('.line-row').forEach(function (row, i) {
+    const ln = SALE_LINES[i];
+    if (!ln) return;
+    const amount = linePrice(productById(ln.pid)) * ln.qty;
+    total += amount;
+    const cell = row.querySelector('.line-amount');
+    if (cell) cell.textContent = money(amount);
+  });
+
+  const sum = host.querySelector('.line-total b');
+  if (sum) sum.textContent = money(total);
 }
 
 function saleLinesTotal() {
@@ -664,8 +693,14 @@ function lineRemove(i) {
   refreshLines();
 }
 
+/**
+ * Miktar alanından gelen her tuş vuruşu. Model kırpılarak güncellenir ama
+ * ALANIN KENDİSİNE DOKUNULMAZ: kullanıcı yazarken değeri geri yazmak imleci
+ * oynatır, alanı boşaltmayı da imkânsız kılar. Gösterilen değer alandan
+ * çıkıldığında modele eşitlenir (bkz. app.js · change dinleyicisi).
+ */
 function lineQty(i, value) {
   const q = Math.max(1, Math.floor(Number(value) || 1));
   if (SALE_LINES[i]) SALE_LINES[i].qty = q;
-  refreshLines();
+  refreshLineTotals();
 }

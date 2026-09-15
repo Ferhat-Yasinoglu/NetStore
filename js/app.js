@@ -1725,6 +1725,16 @@ document.addEventListener('input', function (ev) {
   if (q) lineQty(Number(q.dataset.line), q.value);
 });
 
+/* Alandan çıkınca gösterilen değeri modele eşitle. Yazma sırasında kutuya
+   karışmıyoruz (odak ve imleç bozulmasın diye); ama boş bırakılmış ya da
+   "0" yazılmış bir alan, defterde duran gerçek miktarı göstermeli. */
+document.addEventListener('change', function (ev) {
+  const q = ev.target.closest && ev.target.closest('.line-qty');
+  if (!q) return;
+  const ln = SALE_LINES[Number(q.dataset.line)];
+  if (ln) q.value = ln.qty;
+});
+
 document.addEventListener('keydown', function (ev) {
   if (ev.key === 'Escape') {
     closeDoc(); ACTIVE_FORM = null; PENDING_CONFIRM = null; closeModal(); closeNav();
