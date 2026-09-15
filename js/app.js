@@ -73,15 +73,32 @@ function table(cols, rows, opts) {
     return '<tr>' + tds + '</tr>';
   }).join('');
 
-  return '<div class="table-wrap"><table class="data as-cards' + (opts.wide ? ' wide' : '') +
+  /* wide: geniş tablo, yatayda kaydırılır. narrow: az sütunlu tablo, iki
+     sütunlu ızgaraya sığsın diye alt sınırı düşürülür. */
+  const size = opts.wide ? ' wide' : opts.narrow ? ' narrow' : '';
+  return '<div class="table-wrap"><table class="data as-cards' + size +
          '"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+/**
+ * Sayılan rakam. Kutuya hedef değeri yazar; motion.js sıfırdan sayarak
+ * doldurur. Betik yoksa ya da hareket kapalıysa ilk hâli zaten doğru değer
+ * olduğu için hiçbir şey kaybolmaz.
+ *
+ * fmt: 'money' (varsayılan) veya 'num'
+ */
+function counter(value, fmt) {
+  const v = Number(value) || 0;
+  return '<span data-count="' + v + '" data-count-fmt="' + (fmt === 'num' ? 'num' : 'money') + '">' +
+    (fmt === 'num' ? num(v) : money(v)) + '</span>';
 }
 
 function statCard(o) {
   const trend = o.trend
     ? '<span class="trend ' + o.trend.tone + '">' + (o.trend.icon ? icon(o.trend.icon) : '') +
       o.trend.text + '</span>' : '';
-  return '<article class="stat">' +
+  /* Kartın üst kenarındaki renk çubuğu ikonla aynı aileden olsun. */
+  return '<article class="stat' + (o.tone ? ' tone-' + o.tone : '') + '">' +
     '<div class="stat-top">' +
       '<span class="stat-icon ' + (o.tone || '') + '">' + icon(o.icon) + '</span>' +
       '<div style="min-width:0">' +
@@ -200,20 +217,20 @@ PAGES.dashboard = function () {
 
   const stats = [
     statCard({
-      icon:'truck', tone:'info', label:t('kpi_invest'), value:money(k.invest),
+      icon:'truck', tone:'info', label:t('kpi_invest'), value:counter(k.invest),
       desc:esc(t('kpi_invest_d')),
       trend:{ tone:'flat', text:esc(t('n_purchases', { n:num(PURCHASES.length) })), icon:'archive' },
       spark:sparkline(investTrend, '#3B82F6')
     }),
     statCard({
-      icon:'cart', tone:'accent', label:t('kpi_sales'), value:money(k.sales),
+      icon:'cart', tone:'accent', label:t('kpi_sales'), value:counter(k.sales),
       desc:esc(t('kpi_sales_d')),
       trend: saleMoM === null ? null : { tone: saleMoM >= 0 ? 'up' : 'down',
         text: t('this_month', { p: pct(saleMoM) }), icon: saleMoM >= 0 ? 'trendUp' : 'trendDown' },
       spark:sparkline(s12.map((m) => m.sale), SERIES_1)
     }),
     statCard({
-      icon:'coins', tone:'success', label:t('kpi_profit'), value:money(k.profit),
+      icon:'coins', tone:'success', label:t('kpi_profit'), value:counter(k.profit),
       desc:esc(t('kpi_profit_d', { n: pctPlain(k.margin * 100, 1) })),
       trend: profitMoM === null ? null : { tone: profitMoM >= 0 ? 'up' : 'down',
         text: t('this_month', { p: pct(profitMoM) }), icon: profitMoM >= 0 ? 'trendUp' : 'trendDown' },
@@ -221,7 +238,7 @@ PAGES.dashboard = function () {
     }),
     statCard({
       icon:'boxes', label:t('kpi_stock'),
-      value: num(k.stockUnits) + ' <span style="font-size:15px;color:var(--text-3);font-weight:600">' +
+      value: counter(k.stockUnits, 'num') + ' <span style="font-size:15px;color:var(--text-3);font-weight:600">' +
              esc(t('unit_pcs')) + '</span>',
       desc:esc(t('kpi_stock_d', { v: money(k.stockValue) })),
       meter: meter(1 - ratio(k.lowCount, PRODUCTS.length),
@@ -229,18 +246,35 @@ PAGES.dashboard = function () {
         '<span class="text-warning">' + esc(t('n_critical', { n:num(k.lowCount) })) + '</span>', 'success')
     }),
     statCard({
-      icon:'alert', tone:'warning', label:t('kpi_low'), value:num(k.lowCount),
+      icon:'alert', tone:'warning', label:t('kpi_low'), value:counter(k.lowCount, 'num'),
       desc:esc(t('kpi_low_d')),
       trend:{ tone:'warn', text:esc(t('n_running_out', { n:num(k.outOfRisk) })), icon:'alert' }
     }),
     statCard({
-      icon:'staff', tone:'accent', label:t('kpi_staff'), value:num(k.staffCount),
+      icon:'staff', tone:'accent', label:t('kpi_staff'), value:counter(k.staffCount, 'num'),
       desc:esc(t('kpi_staff_d', { a:num(k.staffCount), t:num(k.staffTotal) })),
       meter: meter(ratio(k.staffCount, k.staffTotal),
         '<span class="text-muted">' + esc(t('active_n', { n:num(k.staffCount) })) + '</span>',
         '<span class="text-dim">' + esc(t('passive_n', { n:num(k.staffTotal - k.staffCount) })) + '</span>', 'accent')
     })
   ].join('');
+
+  /* Şerit: defterin bir bakışta ölçüsü. Hepsi zaten hesaplanmış
+     büyüklüklerden türer, yeni bir veri yolu açmaz. */
+  const openInv = SALES.filter((s) => saleTotals(s).remaining > 0).length;
+  const pulse = [
+    { icon:'users',   tone:'accent',  label:t('pu_customers'),  value:counter(CUSTOMERS.length, 'num') },
+    { icon:'package', tone:'info',    label:t('pu_products'),   value:counter(PRODUCTS.length, 'num') },
+    { icon:'invoice', tone:'warning', label:t('pu_open_inv'),   value:counter(openInv, 'num') },
+    { icon:'receipt', tone:'success', label:t('pu_avg_basket'), value:counter(SALES.length ? k.sales / SALES.length : 0) }
+  ].map((c) =>
+    '<div class="pulse-cell">' +
+      '<span class="pulse-ico ' + c.tone + '">' + icon(c.icon) + '</span>' +
+      '<div style="min-width:0">' +
+        '<div class="pulse-val">' + c.value + '</div>' +
+        '<div class="pulse-lab">' + esc(c.label) + '</div>' +
+      '</div>' +
+    '</div>').join('');
 
   /* Ayarlardaki "Gecikme Uyarısı" kapalıysa (vade gününde) boş döner. */
   const soon = dueSoonSales();
@@ -291,6 +325,14 @@ PAGES.dashboard = function () {
 
       '<div class="grid grid-stats" style="margin-bottom:16px">' + stats + '</div>' +
 
+      '<section class="card" style="margin-bottom:16px">' +
+        '<div class="card-head">' +
+          '<div><h3>' + esc(t('h_pulse')) + '</h3>' +
+          '<p class="sub">' + esc(t('h_pulse_sub')) + '</p></div>' +
+        '</div>' +
+        '<div class="pulse-strip">' + pulse + '</div>' +
+      '</section>' +
+
       '<div class="grid grid-main" style="margin-bottom:16px">' +
         '<section class="card">' +
           '<div class="card-head">' +
@@ -300,20 +342,29 @@ PAGES.dashboard = function () {
               '<span class="legend-key"><span class="legend-swatch" style="background:' + SERIES_2 + '"></span>' + esc(t('c_profit')) + '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="card-body"><div id="trendChart"></div></div>' +
+          '<div class="card-body"><div id="trendChart"></div>' +
+            '<div style="border-top:1px solid var(--border);margin-top:18px;padding-top:16px">' +
+              '<h4 style="font-size:12.5px;color:var(--text-2);margin-bottom:14px">' +
+                esc(t('h_top_products')) + '</h4>' +
+              '<div id="topBars"></div>' +
+            '</div>' +
+          '</div>' +
         '</section>' +
 
         '<section class="card">' +
           '<div class="card-head"><div><h3>' + esc(t('h_collection')) + '</h3>' +
           '<p class="sub">' + esc(t('h_collection_sub')) + '</p></div></div>' +
           '<div class="card-body">' +
-            '<div style="font-size:26px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">' +
-              money(k.paid) + '</div>' +
-            '<p class="text-dim" style="font-size:12px;margin-top:2px">' +
-              esc(t('f_collected_of', { v: money(k.sales) })) + '</p>' +
+            '<div id="collectGauge" class="gauge-host"></div>' +
+            '<div style="text-align:center;margin-top:14px">' +
+              '<div style="font-size:24px;font-weight:750;letter-spacing:-.034em;font-variant-numeric:tabular-nums">' +
+                counter(k.paid) + '</div>' +
+              '<p class="text-dim" style="font-size:12px;margin-top:3px">' +
+                esc(t('f_collected_of', { v: money(k.sales) })) + '</p>' +
+            '</div>' +
             '<div class="meter" style="margin-top:16px">' +
               '<div class="meter-track" style="height:8px"><div class="meter-fill" style="width:' +
-                (ratio(k.paid, k.sales) * 100).toFixed(1) + '%;background:var(--success)"></div></div>' +
+                (ratio(k.paid, k.sales) * 100).toFixed(1) + '%;background:var(--success);color:var(--success)"></div></div>' +
               '<div class="meter-legend">' +
                 '<span class="text-success">' + esc(t('f_paid_pct', { n: pctPlain(ratio(k.paid, k.sales) * 100) })) + '</span>' +
                 '<span class="text-danger">' + esc(t('f_remaining_v', { v: money(k.receivable) })) + '</span>' +
@@ -355,6 +406,11 @@ PAGES.dashboard = function () {
       '</div>',
 
     mount: function () {
+      ringGauge(document.getElementById('collectGauge'), {
+        ratio: ratio(k.paid, k.sales),
+        caption: t('g_collected'),
+        aria: t('h_collection')
+      });
       lineChart(document.getElementById('trendChart'), {
         data: s12,
         series: [{ key:'sale', name:t('series_sales'), color:SERIES_1 },
@@ -363,6 +419,15 @@ PAGES.dashboard = function () {
       });
       hBars(document.getElementById('catBars'),
         categoryTotals().slice(0, 5).map((r) => ({ name: catLabel(r.key), value: r.value })));
+
+      hBars(document.getElementById('topBars'), topProducts(5).map((r) => {
+        const p = productById(r.pid);
+        return {
+          name: p ? p.name : '—',
+          value: r.revenue,
+          display: money(r.revenue) + ' · ' + num(r.qty) + ' ' + t('unit_pcs')
+        };
+      }), SERIES_2);
     }
   };
 };
@@ -392,11 +457,11 @@ PAGES.satislar = function () {
       '</div></div>' +
 
       '<div class="grid grid-3" style="margin-bottom:16px">' +
-        statCard({ icon:'cart', tone:'accent', label:t('k_sel_revenue'), value:money(tot.total),
+        statCard({ icon:'cart', tone:'accent', label:t('k_sel_revenue'), value:counter(tot.total),
                    desc:esc(t('k_n_invoices', { n:num(rows.length) })) }) +
-        statCard({ icon:'handCoins', tone:'success', label:t('k_collected'), value:money(tot.paid),
+        statCard({ icon:'handCoins', tone:'success', label:t('k_collected'), value:counter(tot.paid),
                    desc:esc(t('k_collected_d')) }) +
-        statCard({ icon:'scale', tone:'danger', label:t('k_open_balance'), value:money(tot.rem),
+        statCard({ icon:'scale', tone:'danger', label:t('k_open_balance'), value:counter(tot.rem),
                    desc:esc(t('k_not_collected')) }) +
       '</div>' +
 
@@ -491,9 +556,9 @@ PAGES.stok = function () {
         '<span class="alert-text">' + esc(t('al_low_stock_t')) + '</span></div></div>' : '') +
 
       '<div class="grid grid-3" style="margin-bottom:16px">' +
-        statCard({ icon:'boxes', label:t('k_total_pcs'), value:num(k.stockUnits), desc:esc(t('k_total_pcs_d')) }) +
-        statCard({ icon:'euro', tone:'info', label:t('k_wh_value'), value:money(k.stockValue), desc:esc(t('k_wh_value_d')) }) +
-        statCard({ icon:'alert', tone:'warning', label:t('k_critical'), value:num(k.lowCount), desc:esc(t('k_critical_d')) }) +
+        statCard({ icon:'boxes', label:t('k_total_pcs'), value:counter(k.stockUnits, 'num'), desc:esc(t('k_total_pcs_d')) }) +
+        statCard({ icon:'euro', tone:'info', label:t('k_wh_value'), value:counter(k.stockValue), desc:esc(t('k_wh_value_d')) }) +
+        statCard({ icon:'alert', tone:'warning', label:t('k_critical'), value:counter(k.lowCount, 'num'), desc:esc(t('k_critical_d')) }) +
       '</div>' +
 
       '<section class="card"><div class="card-body flush">' +
@@ -533,9 +598,9 @@ PAGES.alislar = function () {
       icon('plus') + t('btn_new_purchase') + '</button></div></div>' +
 
       '<div class="grid grid-3" style="margin-bottom:16px">' +
-        statCard({ icon:'truck', tone:'info', label:t('kpi_invest'), value:money(total), desc:esc(t('kpi_invest_d')) }) +
-        statCard({ icon:'check', tone:'success', label:t('k_paid_sup'), value:money(paid), desc:esc(t('k_paid_sup_d')) }) +
-        statCard({ icon:'scale', tone:'danger', label:t('k_sup_debt'), value:money(total - paid), desc:esc(t('k_sup_debt_d')) }) +
+        statCard({ icon:'truck', tone:'info', label:t('kpi_invest'), value:counter(total), desc:esc(t('kpi_invest_d')) }) +
+        statCard({ icon:'check', tone:'success', label:t('k_paid_sup'), value:counter(paid), desc:esc(t('k_paid_sup_d')) }) +
+        statCard({ icon:'scale', tone:'danger', label:t('k_sup_debt'), value:counter(total - paid), desc:esc(t('k_sup_debt_d')) }) +
       '</div>' +
 
       '<section class="card"><div class="card-body flush">' +
@@ -761,11 +826,11 @@ PAGES.tahsilatlar = function () {
       icon('handCoins') + t('btn_add_payment') + '</button></div></div>' +
 
       '<div class="grid grid-3" style="margin-bottom:16px">' +
-        statCard({ icon:'handCoins', tone:'success', label:t('k_total_pay'), value:money(total), desc:esc(t('k_all_time')) }) +
+        statCard({ icon:'handCoins', tone:'success', label:t('k_total_pay'), value:counter(total), desc:esc(t('k_all_time')) }) +
         statCard({ icon:'calendar', tone:'accent', label:t('k_this_month'),
-                   value:money(thisMonth.reduce((s, p) => s + p.amount, 0)),
+                   value:counter(thisMonth.reduce((s, p) => s + p.amount, 0)),
                    desc:esc(t('k_n_moves', { n:num(thisMonth.length) })) }) +
-        statCard({ icon:'scale', tone:'danger', label:t('k_pending_rec'), value:money(kpis().receivable),
+        statCard({ icon:'scale', tone:'danger', label:t('k_pending_rec'), value:counter(kpis().receivable),
                    desc:esc(t('k_not_collected')) }) +
       '</div>' +
 
@@ -818,11 +883,11 @@ PAGES.borc = function () {
       '</div></div>' +
 
       '<div class="grid grid-3" style="margin-bottom:16px">' +
-        statCard({ icon:'scale', tone:'danger', label:t('k_total_rec'), value:money(totalRem), desc:esc(t('k_total_rec_d')) }) +
-        statCard({ icon:'alert', tone:'warning', label:t('k_overdue_rec'), value:money(overdue),
+        statCard({ icon:'scale', tone:'danger', label:t('k_total_rec'), value:counter(totalRem), desc:esc(t('k_total_rec_d')) }) +
+        statCard({ icon:'alert', tone:'warning', label:t('k_overdue_rec'), value:counter(overdue),
                    desc:esc(t('k_overdue_rec_d')),
                    trend:{ tone:'warn', text:esc(t('k_share', { n: pctPlain(ratio(overdue, totalRem) * 100) })), icon:'alert' } }) +
-        statCard({ icon:'truck', tone:'info', label:t('k_sup_debt'), value:money(purchaseDebt), desc:esc(t('k_biz_debt_d')) }) +
+        statCard({ icon:'truck', tone:'info', label:t('k_sup_debt'), value:counter(purchaseDebt), desc:esc(t('k_biz_debt_d')) }) +
       '</div>' +
 
       '<section class="card" style="margin-bottom:16px">' +
@@ -879,12 +944,12 @@ PAGES.raporlar = function () {
       '</div></div>' +
 
       '<div class="grid grid-stats" style="margin-bottom:16px">' +
-        statCard({ icon:'cart', tone:'accent', label:t('k_revenue'), value:money(k.sales),
+        statCard({ icon:'cart', tone:'accent', label:t('k_revenue'), value:counter(k.sales),
                    desc:esc(t('k_revenue_d')), spark:sparkline(s12.map((m) => m.sale), SERIES_1) }) +
-        statCard({ icon:'coins', tone:'success', label:t('k_gross_profit'), value:money(k.profit),
+        statCard({ icon:'coins', tone:'success', label:t('k_gross_profit'), value:counter(k.profit),
                    desc:esc(t('k_avg_margin', { n: pctPlain(k.margin * 100, 1) })),
                    spark:sparkline(s12.map((m) => m.profit), SERIES_2) }) +
-        statCard({ icon:'truck', tone:'info', label:t('k_investment'), value:money(k.invest), desc:esc(t('k_investment_d')) }) +
+        statCard({ icon:'truck', tone:'info', label:t('k_investment'), value:counter(k.invest), desc:esc(t('k_investment_d')) }) +
       '</div>' +
 
       '<div class="grid grid-main" style="margin-bottom:16px">' +
@@ -901,7 +966,7 @@ PAGES.raporlar = function () {
         '<div class="card-body"><div id="repCat"></div></div></section>' +
       '</div>' +
 
-      '<div class="grid grid-2">' +
+      '<div class="grid grid-2" style="align-items:start">' +
         '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_top_products')) + '</h3>' +
         '<p class="sub">' + esc(t('h_top_sub')) + '</p></div></div>' +
         '<div class="card-body flush">' +
@@ -913,7 +978,7 @@ PAGES.raporlar = function () {
                 '<span class="cell-sub">' + esc(p ? catLabel(p.cat) : '') + '</span></span></span>'; } },
           { key:'qty', label:t('c_qty'), align:'right', render:(r) => '<span class="num">' + num(r.qty) + '</span>' },
           { key:'rev', label:t('c_revenue'), align:'right', render:(r) => '<span class="num strong">' + money(r.revenue) + '</span>' }
-        ], topProducts(6)) + '</div></section>' +
+        ], topProducts(6), { narrow:true }) + '</div></section>' +
 
         '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_monthly_break')) + '</h3>' +
         '<p class="sub">' + esc(t('h_monthly_b_sub')) + '</p></div></div>' +
@@ -925,7 +990,7 @@ PAGES.raporlar = function () {
           { key:'p', label:t('c_profit'), align:'right', render:(m) => '<span class="num text-success">' + money(m.profit) + '</span>' },
           { key:'mg', label:t('c_margin'), align:'right', render:(m) =>
             '<span class="num text-dim">' + (m.sale ? pctPlain(ratio(m.profit, m.sale) * 100) + (lang() === 'fa' ? '٪' : '%') : '—') + '</span>' }
-        ], s12.slice().reverse()) + '</div></section>' +
+        ], s12.slice().reverse(), { narrow:true }) + '</div></section>' +
       '</div>',
 
     mount: function () {
@@ -1059,7 +1124,7 @@ PAGES.ayarlar = function () {
       '<div class="head-actions"><button class="btn btn-primary" data-act="save-settings">' +
       icon('check') + t('btn_save_set') + '</button></div></div>' +
 
-      '<div class="grid grid-2">' +
+      '<div class="grid grid-2" style="align-items:start">' +
         '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_business')) + '</h3>' +
         '<p class="sub">' + esc(t('h_business_sub')) + '</p></div></div>' +
         '<div class="card-body">' +
@@ -1080,6 +1145,15 @@ PAGES.ayarlar = function () {
           '<div class="card-body"><div class="seg" data-seg="lang" style="width:100%">' +
             Object.keys(LANGS).map((k) => '<button data-val="' + k + '"' +
               (lang() === k ? ' class="on"' : '') + ' style="flex:1">' + esc(LANGS[k].name) + '</button>').join('') +
+          '</div></div></section>' +
+
+          '<section class="card"><div class="card-head"><div><h3>' + esc(t('s_theme')) + '</h3>' +
+          '<p class="sub">' + esc(t('s_theme_hint')) + '</p></div></div>' +
+          '<div class="card-body"><div class="seg" data-seg="theme" style="width:100%">' +
+            [['dark', t('th_dark'), 'moon'], ['light', t('th_light'), 'sun']].map(([k, l, ic]) =>
+              '<button data-val="' + k + '"' + (theme() === k ? ' class="on"' : '') +
+              ' style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px">' +
+              icon(ic) + esc(l) + '</button>').join('') +
           '</div></div></section>' +
 
           '<section class="card"><div class="card-head"><div><h3>' + esc(t('s_calendar')) + '</h3>' +
@@ -1327,6 +1401,14 @@ function renderChrome() {
   si.placeholder = t('search_ph');
   si.setAttribute('aria-label', t('aria_search'));
   document.getElementById('btnNotif').setAttribute('aria-label', t('aria_notif'));
+
+  /* Tema düğmesi: adı seçili dilde, başlığı bir sonraki duruma işaret eder. */
+  const tb = document.getElementById('btnTheme');
+  if (tb) {
+    const next = theme() === 'dark' ? t('th_light') : t('th_dark');
+    tb.setAttribute('aria-label', t('aria_theme'));
+    tb.setAttribute('title', next);
+  }
   document.getElementById('btnHelp').setAttribute('aria-label', t('aria_help'));
   document.getElementById('btnBurger').setAttribute('aria-label', t('aria_menu_open'));
   document.getElementById('btnNavClose').setAttribute('aria-label', t('aria_menu_close'));
@@ -1400,15 +1482,24 @@ function render() {
   closeDoc();
   closeModal();
 
+  /* Grafik renkleri SVG'nin içine yazılıyor; seçili temanın tokenlarını
+     çizimden hemen önce tazele ki tema değişince grafik de dönsün. */
+  readChartTheme();
+
   renderChrome();
   const out = PAGES[STATE.route](STATE.param);
-  document.getElementById('page').innerHTML = out.html;
+
+  const page = document.getElementById('page');
+  page.innerHTML = out.html;
   window.scrollTo(0, 0);
 
   renderSidebar();
   if (out.mount) out.mount();
   bindSearch();
   closeNav();
+
+  /* Hareket katmanı en sonda: grafikler ve tablolar artık DOM'da. */
+  if (typeof mountMotion === 'function') mountMotion(page);
 }
 
 /** Kaydı diske yazıp ekranı tazeler. Veriyi değiştiren her yol buradan geçer. */
@@ -1530,6 +1621,8 @@ document.addEventListener('click', function (ev) {
     const group = seg.closest('[data-seg]').dataset.seg;
     if (group === 'lang') { setLang(seg.dataset.val); render(); return; }
     if (group === 'cal')  { setCalendar(seg.dataset.val); render(); return; }
+    /* setTheme kendisi render() çağırır — burada ikinci kez çizmeye gerek yok. */
+    if (group === 'theme') { setTheme(seg.dataset.val); return; }
     STATE.filter = seg.dataset.val; render(); return;
   }
 
@@ -1596,6 +1689,11 @@ document.addEventListener('click', function (ev) {
     return;
   }
   if (act === 'search-toggle') { toggleMobileSearch(); return; }
+  if (act === 'toggle-theme') {
+    toggleTheme();
+    toast(t('th_switched', { m: theme() === 'dark' ? t('th_dark') : t('th_light') }), 'info');
+    return;
+  }
 
   /* --- ayarlar --- */
   if (act === 'install-app') { promptInstall(); return; }
@@ -1639,7 +1737,9 @@ window.addEventListener('hashchange', render);
 
 document.addEventListener('DOMContentLoaded', function () {
   applyLangToDocument();
+  applyThemeToDocument();
   hydrateIcons(document);
+  initScrollBar();
   captureSeed();        // örnek verinin kopyası — “demoya dön” için
   bootApp();
 });

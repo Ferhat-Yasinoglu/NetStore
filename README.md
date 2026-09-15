@@ -1,8 +1,12 @@
 # NetStore — Stok, Satış, Müşteri, Borç & Tahsilat Paneli
 
-Modern dark SaaS dashboard estetiğinde, bağımlılıksız (vanilla HTML/CSS/JS) bir
+Modern SaaS dashboard estetiğinde, bağımlılıksız (vanilla HTML/CSS/JS) bir
 yönetim paneli arayüzü. Derleme adımı yok — `netstore/index.html` doğrudan
 tarayıcıda açılır.
+
+**İki tema:** koyu (varsayılan) ve aydınlık. Seçim üst bardaki düğmeden ya da
+Ayarlar → Görünüm'den yapılır, cihazda saklanır; ilk açılışta işletim
+sisteminin tercihine uyulur.
 
 **Üç dil:** دری (Farsça) · Türkçe · English. Seçilen dil arayüzün tamamını,
 faturaları ve tahsilat fişlerini kapsar; Farsça seçildiğinde düzen sağdan sola
@@ -29,6 +33,8 @@ Başla** ile temizleyip kendi kayıtlarınızla çalışabilirsiniz.
 | `index.html` | Uygulama kabuğu: kenar çubuğu, üst bar, belge/modal/bildirim yuvaları |
 | `css/netstore.css` | Tasarım sistemi: tokenlar, bileşenler, RTL, responsive, baskı |
 | `js/i18n.js` | **Sözlük + dil çalışma zamanı**: çeviri, yön, sayı/para/tarih biçimi |
+| `js/theme.js` | **Tema çalışma zamanı**: koyu/aydınlık seçimi, `data-theme`, tarayıcı çubuğu rengi |
+| `js/motion.js` | **Hareket katmanı**: giriş sırası, sayaçlar, dolum, ışık hâlesi, dalga, kaydırma şeridi |
 | `js/pwa.js` | Telefona kurulum: `beforeinstallprompt` yakalama, kurulum/çevrimdışı durumu |
 | `js/store.js` | **Kalıcılık**: yerel modda localStorage, ortak modda bulut; yedek al/geri yükle |
 | `js/firebase-config.js` | **Doldurulacak dosya**: Firebase bilgileri + izinli e-postalar |
@@ -150,26 +156,66 @@ rakamları normalize edilir (`۱۲۳` yazınca `123` bulunur).
 
 Dar ekranda kutu yer kaplamasın diye büyüteç düğmesiyle açılır.
 
-## Renk sistemi
+## Görsel dil
 
 Tasarımın yaklaşık **%80'i nötr yüzey**, **%20'si vurgu** rengidir. Renk yalnızca
-bir anlam taşıdığında kullanılır.
+bir anlam taşıdığında kullanılır — gradyanlar kabuğu boyar, veriyi değil.
 
-| Rol | Değer |
+Üç katman vardır:
+
+| Katman | Ne | Nerede |
+|---|---|---|
+| 0 — zemin | Yavaşça sürüklenen aurora ışık lekeleri + ince ızgara dokusu | `.aurora`, `index.html` gövdesinin başında |
+| 1 — cam paneller | Bulanık arka plan, gradyan saç teli kenarlık | kenar çubuğu, üst bar, modal, arama paneli, bildirim |
+| 2 — vurgu | Mor → fuşya gradyan, renkli gölge | aktif menü, birincil düğme, KPI ikonu, ölçek |
+
+Saç teli kenarlık `padding-box` / `border-box` ikilisiyle kurulur: kartın
+zemini iç kutuya, gradyan kenarlığa boyanır. Böylece 1px'lik kenar tek bir
+düz renk yerine köşeden köşeye açılan bir ışık olur.
+
+| Rol | Koyu | Aydınlık |
+|---|---|---|
+| Arka plan | `#070B16` | `#F1F3FB` |
+| Kart | `#0F1626` | `#FFFFFF` |
+| İkincil kart | `#151D31` | `#F6F7FD` |
+| Ana vurgu / hover | `#8B5CF6` / `#A78BFA` | `#7C3AED` / `#6D28D9` |
+| Başarı, ödenen | `#22C55E` | `#16A34A` |
+| Borç, gecikme | `#F43F5E` | `#E11D48` |
+| Uyarı, yaklaşan vade | `#F59E0B` | `#B45309` |
+| Bilgi | `#3B82F6` | `#2563EB` |
+| Ana / ikincil yazı | `#F8FAFC` / `#94A3B8` | `#0B1220` / `#475569` |
+
+Grafik serileri (satış moru, kâr yeşili) renk körlüğü ayrımı ve yüzey kontrastı
+açısından ayrıca doğrulanmıştır ve her iki temada farklı tonlara oturur:
+koyuda `--series-1: #A78BFA`, aydınlıkta `#7C3AED`.
+
+**Tema nasıl çalışır.** `js/theme.js` `<head>` içinde, gövdeden önce yüklenir ve
+kök öğeye `data-theme` yazar — sayfa bir an koyu çizilip sonra beyaza dönmesin
+diye. Bileşenlerin hiçbirinde tema kodu yoktur; hepsi tokenları okur. Tek
+istisna grafiklerdir: SVG renklerini kendi içine yazdığı için tema değişince
+yeniden çizilmeleri gerekir (`readChartTheme()` + `render()`).
+
+## Hareket
+
+`js/motion.js` arayüzün canlı hissini veren altı küçük işi toplar. Hiçbiri
+veriye dokunmaz; bu dosya hiç yüklenmese de sayfa tam içerikle çizilir.
+
+| İş | Ne yapar |
 |---|---|
-| Arka plan | `#0B1120` |
-| Kart | `#111827` |
-| İkincil kart | `#151D2E` |
-| Ana vurgu / hover | `#7C3AED` / `#8B5CF6` |
-| Başarı, ödenen | `#22C55E` |
-| Borç, gecikme | `#EF4444` |
-| Uyarı, yaklaşan vade | `#F59E0B` |
-| Bilgi | `#3B82F6` |
-| Ana / ikincil yazı | `#FFFFFF` / `#94A3B8` |
+| Giriş sırası | Sayfa blokları sırayla yükselerek belirir; ızgaralarda kartlar tek tek gecikir (tavan 420 ms) |
+| Sayaç | KPI rakamları sıfırdan hedefe sayılır — seçili dilin rakamlarıyla (۱۲۳ / 123) |
+| Dolum | Oran çubukları ve radyal ölçek sıfırdan gerçek değerine akar |
+| Işık hâlesi | Kartlar imleci `--mx` / `--my` özelliklerinde tutar, hâleyi CSS çizer (kare başına tek yazma) |
+| Dalga | Düğmeye basılan noktadan yayılan halka |
+| Kaydırma şeridi | Üst barın alt kenarında okuma göstergesi |
 
-Grafik serileri (`#8B5CF6` satış, `#16A34A` kâr) renk körlüğü ayrımı ve yüzey
-kontrastı açısından ayrıca doğrulanmıştır; bu yüzden arayüzdeki `--success`
-tonundan bir adım koyudurlar.
+Grafikler de kendilerini çizer: `armDraw()` çizgi yolunun uzunluğunu ölçüp
+`stroke-dasharray` ile soldan sağa açar.
+
+**Hareketi azalt.** İşletim sisteminde `prefers-reduced-motion` açıksa süsleme
+niteliğindeki her şey durur — aurora sürüklenmesi, nabızlar, parıltılar, giriş
+animasyonu, sayaçlar. İçerik son hâliyle görünür; hiçbir bilgi animasyona
+bağlı değildir.
 
 ## Veri mantığı
 
@@ -301,8 +347,8 @@ tam ekran açılır ve **internetsiz çalışır**.
 
 | Parça | Ne yapar |
 |---|---|
-| `manifest.webmanifest` | Ad, simge, `standalone` modu, `#0B1120` tema rengi, üç kısayol (Yeni Satış / Müşteriler / Borç Takibi) |
-| `sw.js` | 23 dosyalık uygulama kabuğunu kurulumda önbelleğe alır; sonraki açılışlarda önce önbellekten verir, arka planda tazeler |
+| `manifest.webmanifest` | Ad, simge, `standalone` modu, tema rengi, üç kısayol (Yeni Satış / Müşteriler / Borç Takibi) |
+| `sw.js` | 25 dosyalık uygulama kabuğunu kurulumda önbelleğe alır; sonraki açılışlarda önce önbellekten verir, arka planda tazeler |
 | `js/pwa.js` | Kurulum olayını yakalar; Ayarlar → **Uygulama** kartında “Telefona Kur” düğmesi olarak sunar |
 | `fonts/` | Yazı tipleri depoda — internetsiz açılışta Farsça metin yedek yazı tipine düşmez |
 
@@ -334,7 +380,10 @@ telefona iner.
 - **≤860px** — iki sütunlu ızgaralar tek sütuna iner
 - **≤720px** — KPI kartları alt alta; tablolar `data-label` ile **kart görünümüne**
   dönüşür; geniş tablolar yatayda kaydırılır; filtre şeridi tek satırda kayar;
-  fatura kâğıdı tek sütuna iner
+  fatura kâğıdı tek sütuna iner; cam katmanların bulanıklığı hafifletilir
+- **≤430px** — üst barda yalnızca dil seçici ve tema düğmesi kalır; zil ve soru
+  işareti (ikisi de yalnızca birer gösterge) gizlenir — tema tercihine
+  Ayarlar → Görünüm'den de erişilir
 
 13 sayfanın tamamı **3 dil × 4 ekran genişliği** (1440 / 820 / 390 / 360 px)
 kombinasyonunda yatay taşma, JS hatası ve çevrilmemiş metin olmadan
