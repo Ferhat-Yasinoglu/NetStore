@@ -568,7 +568,11 @@ PAGES.stok = function () {
           '<span><span class="cell-title">' + esc(p.name) + '</span>' +
           '<span class="cell-sub">' + esc(p.sku) + ' · ' + esc(supplierName(p.sup)) + '</span></span></span>' },
         { key:'stock', label:t('c_current'), align:'right', render:(p) => {
-            const ratio = Math.min(1, p.stock / (p.min * 2.5));
+            /* p.min = 0 iken 0/(0*2.5) = NaN; `width:NaN%` geçersiz olduğu için
+               tarayıcı bildirimi atıyor ve çubuk TAM DOLU çiziliyordu — stoğu
+               bitmiş ürün "depo dolu" gibi görünüyordu. */
+            const ratio = p.min > 0 ? Math.min(1, p.stock / (p.min * 2.5))
+                                    : (p.stock > 0 ? 1 : 0);
             const col = p.stock <= p.min ? 'var(--danger)' : p.stock <= p.min * 1.6 ? 'var(--warning)' : 'var(--success)';
             return '<span class="num strong">' + num(p.stock) + '</span>' +
                    '<span class="stock-bar"><span style="width:' + (ratio * 100).toFixed(0) +
@@ -1721,6 +1725,16 @@ document.addEventListener('input', function (ev) {
   if (q) lineQty(Number(q.dataset.line), q.value);
 });
 
+/* Alandan çıkınca gösterilen değeri modele eşitle. Yazma sırasında kutuya
+   karışmıyoruz (odak ve imleç bozulmasın diye); ama boş bırakılmış ya da
+   "0" yazılmış bir alan, defterde duran gerçek miktarı göstermeli. */
+document.addEventListener('change', function (ev) {
+  const q = ev.target.closest && ev.target.closest('.line-qty');
+  if (!q) return;
+  const ln = SALE_LINES[Number(q.dataset.line)];
+  if (ln) q.value = ln.qty;
+});
+
 document.addEventListener('keydown', function (ev) {
   if (ev.key === 'Escape') {
     closeDoc(); ACTIVE_FORM = null; PENDING_CONFIRM = null; closeModal(); closeNav();
@@ -1737,11 +1751,17 @@ window.addEventListener('hashchange', render);
 
 document.addEventListener('DOMContentLoaded', function () {
   applyLangToDocument();
-  applyThemeToDocument();
+  if (typeof applyThemeToDocument === 'function') applyThemeToDocument();
   hydrateIcons(document);
-  initScrollBar();
   captureSeed();        // örnek verinin kopyası — “demoya dön” için
   bootApp();
+
+  /* Süsleme katmanı EN SONDA ve korumalı çağrılır. js/motion.js yüklenemezse
+     (önbellek boşluğu, engelleyici eklenti, kesilen indirme) korumasız bir
+     çağrı burada TypeError atıp captureSeed() ile bootApp()'i hiç
+     çalıştırmıyordu: kullanıcı bomboş bir sayfa görüyordu. Hareket
+     süslemedir; defteri açmayı engellememeli. */
+  if (typeof initScrollBar === 'function') initScrollBar();
 });
 
 /**

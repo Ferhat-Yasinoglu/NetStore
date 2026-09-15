@@ -20,6 +20,7 @@ let SERIES_2 = '#34D399';  /* Kâr   */
 let GRID     = 'rgba(148,163,184,0.12)';
 let AXIS_INK = '#64748B';
 let SURFACE  = '#0F1626';
+let GAUGE_TO = '#A7F3D0';
 
 /** Grafik renklerini CSS tokenlarından tazeler. render() her çizimde çağırır. */
 function readChartTheme() {
@@ -36,6 +37,7 @@ function readChartTheme() {
   GRID     = read('--grid', GRID);
   AXIS_INK = read('--axis-ink', AXIS_INK);
   SURFACE  = read('--chart-surface', SURFACE);
+  GAUGE_TO = read('--gauge-to', GAUGE_TO);
 }
 
 /* --- yardımcılar --- */
@@ -381,7 +383,7 @@ function ringGauge(host, opts) {
   const g = gid('rg');
 
   const from = opts.from || SERIES_2;
-  const to = opts.to || '#A7F3D0';
+  const to = opts.to || GAUGE_TO;
 
   host.innerHTML =
     '<div class="gauge" style="width:' + size + 'px;height:' + size + 'px">' +
