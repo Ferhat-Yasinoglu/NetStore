@@ -556,6 +556,7 @@ const I18N = {
   pw_offline_wait: { tr:'Çevrimdışı kopya hazırlanıyor — sayfayı bir kez yenileyin.', en:'Preparing the offline copy — refresh the page once.', fa:'نسخهٔ آفلاین آماده می‌شود — یک بار صفحه را تازه کنید.' },
   pw_offline_none: { tr:'Çevrimdışı destek yok — uygulama https:// adresinden açılmalı.', en:'No offline support — open the app over https://.', fa:'پشتیبانی آفلاین نیست — برنامه باید از https:// باز شود.' },
   pw_install_done: { tr:'Uygulama ana ekrana eklendi.', en:'App added to your home screen.', fa:'اپلیکیشن به صفحهٔ اصلی اضافه شد.' },
+  pw_updated:      { tr:'Yeni sürüm hazır — uygulamayı kapatıp açın.', en:'A new version is ready — close and reopen the app.', fa:'نسخهٔ جدید آماده است — برنامه را ببندید و دوباره باز کنید.' },
   pw_install_no:   { tr:'Kurulum iptal edildi.',  en:'Installation dismissed.', fa:'نصب لغو شد.' },
 
   /* ---------------- boş durumlar ---------------- */
