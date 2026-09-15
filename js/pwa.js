@@ -44,6 +44,18 @@ function isStandalone() {
 }
 
 /**
+ * Uygulama ŞU AN nasıl çalışıyor?
+ *   'app'     — ana ekrandan, tam ekran (gerçek kurulum)
+ *   'browser' — tarayıcı sekmesinde, adres çubuğu görünür
+ *
+ * Bu ayrımı kullanıcıya göstermek şart: ana ekrana "yer imi" eklemek de bir
+ * simge bırakıyor ve kullanıcı kurduğunu sanıyor, ama simge uygulamayı
+ * tarayıcıda açıyor. Tam ekranın ve güvenilir çevrimdışı davranışın
+ * kaybı buradan geliyor ve ekranda hiçbir yerde yazmıyordu.
+ */
+function runMode() { return isStandalone() ? 'app' : 'browser'; }
+
+/**
  * Kurulum durumu:
  *   'installed' — zaten kurulu ya da ana ekrandan açılmış
  *   'ready'     — düğmeye basınca kurulabilir

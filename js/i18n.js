@@ -550,7 +550,7 @@ const I18N = {
   pw_installed_sub:{ tr:'Ana ekrandaki simgeden tam ekran açılıyor.', en:'Opens full screen from the home-screen icon.', fa:'از آیکن صفحهٔ اصلی به‌صورت تمام‌صفحه باز می‌شود.' },
   pw_ready_sub:    { tr:'Ana ekrana simge eklenir, tarayıcı çubuğu görünmez.', en:'Adds a home-screen icon and hides the browser bar.', fa:'آیکن به صفحهٔ اصلی اضافه می‌شود و نوار مرورگر پنهان می‌گردد.' },
   pw_manual:       { tr:'Tarayıcı menüsünden kurun', en:'Install from the browser menu', fa:'از منوی مرورگر نصب کنید' },
-  pw_manual_and:   { tr:'Android · Chrome: ⋮ menüsü → “Uygulamayı yükle” veya “Ana ekrana ekle”.', en:'Android · Chrome: ⋮ menu → “Install app” or “Add to Home screen”.', fa:'اندروید · کروم: منوی ⋮ ← «نصب برنامه» یا «افزودن به صفحهٔ اصلی».' },
+  pw_manual_and:   { tr:'Android · Chrome: ⋮ menüsü → “Uygulamayı yükle”. Bu seçenek yoksa sayfayı bir kez yenileyip tekrar bakın.', en:'Android · Chrome: ⋮ menu → “Install app”. If it is missing, refresh the page once and look again.', fa:'اندروید · کروم: منوی ⋮ ← «نصب برنامه». اگر نبود، یک بار صفحه را تازه کنید و دوباره ببینید.' },
   pw_manual_ios:   { tr:'iPhone · Safari: Paylaş → “Ana Ekrana Ekle”.', en:'iPhone · Safari: Share → “Add to Home Screen”.', fa:'آیفون · سافاری: اشتراک‌گذاری ← «افزودن به صفحهٔ اصلی».' },
   pw_offline_on:   { tr:'Çevrimdışı hazır — internet olmadan da açılır.', en:'Offline ready — opens without internet.', fa:'آمادهٔ کار بدون انترنت.' },
   pw_offline_wait: { tr:'Çevrimdışı kopya hazırlanıyor — sayfayı bir kez yenileyin.', en:'Preparing the offline copy — refresh the page once.', fa:'نسخهٔ آفلاین آماده می‌شود — یک بار صفحه را تازه کنید.' },
@@ -558,6 +558,9 @@ const I18N = {
   pw_install_done: { tr:'Uygulama ana ekrana eklendi.', en:'App added to your home screen.', fa:'اپلیکیشن به صفحهٔ اصلی اضافه شد.' },
   pw_updated:      { tr:'Yeni sürüm hazır — uygulamayı kapatıp açın.', en:'A new version is ready — close and reopen the app.', fa:'نسخهٔ جدید آماده است — برنامه را ببندید و دوباره باز کنید.' },
   pw_install_no:   { tr:'Kurulum iptal edildi.',  en:'Installation dismissed.', fa:'نصب لغو شد.' },
+  pw_in_browser:   { tr:'Tarayıcı sekmesinde açık', en:'Running in a browser tab', fa:'در زبانهٔ مرورگر باز است' },
+  pw_in_browser_sub:{ tr:'Tam ekran uygulama olarak çalışmıyor. Ana ekranda simge varsa kurulum değil, yer imi eklenmiş olabilir.', en:'It is not running as a full-screen app. If there is a home-screen icon, it may be a bookmark rather than an installed app.', fa:'به‌صورت برنامهٔ تمام‌صفحه اجرا نمی‌شود. اگر آیکنی در صفحهٔ اصلی هست، ممکن است نشانک باشد نه برنامهٔ نصب‌شده.' },
+  pw_shortcut_tip: { tr:'Nasıl anlarsınız: doğru kurulumda üstte adres çubuğu görünmez. Görünüyorsa simge yer imidir — silip yukarıdaki adımla yeniden kurun.', en:'How to tell: a proper install hides the address bar. If you can see it, the icon is a bookmark — remove it and install again with the step above.', fa:'چگونه بفهمید: در نصب درست، نوار آدرس دیده نمی‌شود. اگر دیده می‌شود، آیکن نشانک است — آن را حذف کنید و با مرحلهٔ بالا دوباره نصب کنید.' },
 
   /* ---------------- boş durumlar ---------------- */
   e_start_products:{ tr:'Henüz ürün yok. “{b}” ile ilk ürününüzü ekleyin.', en:'No products yet. Add your first with “{b}”.', fa:'هنوز جنسی نیست. با «{b}» اولین جنس را اضافه کنید.' },
