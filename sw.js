@@ -10,7 +10,7 @@
    sonra CACHE sabitindeki numarayı artırmak yeterlidir.
    ========================================================================== */
 
-const CACHE = 'netstore-v20';
+const CACHE = 'netstore-v21';
 
 /* Uygulama kabuğu — hepsi kuruluşta indirilir. */
 const SHELL = [
@@ -28,6 +28,7 @@ const SHELL = [
   './js/motion.js',
   './js/pwa.js',
   './js/icons.js',
+  './js/art.js',
   './js/data.js',
   './js/store.js',
   './js/settings.js',

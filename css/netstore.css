@@ -1375,6 +1375,64 @@ html[dir='rtl'] .gauge-cap { letter-spacing: normal; }
   50%      { transform: translateY(-6px); }
 }
 .empty p { font-size: 13px; }
+/* çizimli boş sahne (js/art.js) — eski simge kuralını ezer */
+.empty svg.empty-art {
+  width: 208px; height: 143px; max-width: 100%; margin: 0 auto 8px; opacity: 1;
+  display: block; animation: float 4.2s var(--ease) infinite;
+}
+.spark { transform-box: fill-box; transform-origin: center; animation: twinkle 2.6s ease-in-out infinite; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.55) rotate(0deg); }
+  50%      { opacity: 1;    transform: scale(1)    rotate(45deg); }
+}
+
+/* kategori küçük resmi: zemin çizimin kendisinde */
+.thumb.art { background: none; border: 0; box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.5); }
+.thumb.art svg { width: 36px; height: 36px; display: block; border-radius: 11px; }
+tr:hover .thumb.art, .card-row:hover .thumb.art { transform: translateY(-2px) rotate(-4deg) scale(1.06); }
+.trend-cell .spark { display: block; }
+
+/* dashboard karşılama şeridi */
+.hero {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding: 8px 18px 8px 26px; margin-bottom: 16px;
+  border-radius: var(--r-2xl);
+  background:
+    linear-gradient(var(--glass-strong), var(--glass-strong)) padding-box,
+    var(--g-hairline) border-box;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-lg);
+}
+.hero::before {
+  content: ''; position: absolute; inset: -60% auto auto -8%;
+  width: 46%; height: 220%;
+  background: radial-gradient(closest-side, var(--accent-glow), transparent 70%);
+  opacity: 0.55; pointer-events: none;
+}
+.hero-text { position: relative; min-width: 0; padding: 10px 0; }
+.hero-greet { font-size: 11.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+html[dir='rtl'] .hero-greet { letter-spacing: normal; }
+.hero-title { font-size: 23px; font-weight: 800; letter-spacing: -0.015em; margin: 5px 0 6px; color: var(--text); }
+html[dir='rtl'] .hero-title { letter-spacing: normal; }
+.hero-sub { font-size: 13.5px; color: var(--text-2); margin: 0; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.hero-art { flex: none; position: relative; }
+.hero-art .shop-art { display: block; width: 224px; height: auto; }
+@media (max-width: 860px) { .hero-art .shop-art { width: 180px; } }
+@media (max-width: 720px) {
+  .hero { padding: 14px 18px; }
+  .hero-art { display: none; }
+  .hero-title { font-size: 19px; }
+}
+
+/* giriş ekranındaki vitrin */
+.auth-art { display: flex; justify-content: center; margin: -6px 0 6px; }
+.auth-art .shop-art { width: 200px; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .empty svg.empty-art, .spark { animation: none !important; }
+}
 
 .alert {
   position: relative;

@@ -478,6 +478,43 @@ function categoryTotals() {
 }
 
 /** En çok satan ürünler. */
+/** Son n ayın [başlangıç, bitiş) aralıkları — eskiden yeniye. */
+function monthBuckets(n) {
+  const out = [];
+  for (let back = n - 1; back >= 0; back--) {
+    const from = new Date(TODAY.getFullYear(), TODAY.getMonth() - back, 1);
+    out.push({ from: from, to: new Date(from.getFullYear(), from.getMonth() + 1, 1) });
+  }
+  return out;
+}
+function bucketIndex(buckets, d) {
+  for (let i = 0; i < buckets.length; i++) if (d >= buckets[i].from && d < buckets[i].to) return i;
+  return -1;
+}
+
+/** Ürün başına son n ayda satılan adet, ay ay: { pid: [..n] }. Tablo eğilim sütunu için. */
+function productTrends(n) {
+  const b = monthBuckets(n), out = {};
+  PRODUCTS.forEach((p) => { out[p.id] = new Array(n).fill(0); });
+  SALES.forEach((s) => {
+    const i = bucketIndex(b, s.date);
+    if (i < 0) return;
+    s.items.forEach((it) => { if (out[it.pid]) out[it.pid][i] += it.qty; });
+  });
+  return out;
+}
+
+/** Müşteri başına son n ayın alışveriş tutarı, ay ay: { cid: [..n] }. */
+function customerTrends(n) {
+  const b = monthBuckets(n), out = {};
+  CUSTOMERS.forEach((c) => { out[c.id] = new Array(n).fill(0); });
+  SALES.forEach((s) => {
+    const i = bucketIndex(b, s.date);
+    if (i >= 0 && out[s.customerId]) out[s.customerId][i] += saleTotals(s).total;
+  });
+  return out;
+}
+
 function topProducts(n) {
   const map = {};
   SALES.forEach((s) => s.items.forEach((it) => {

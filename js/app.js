@@ -58,7 +58,7 @@ function statusBadge(st) { return badge(st.tone, st.label, st.icon); }
 function table(cols, rows, opts) {
   opts = opts || {};
   if (!rows.length) {
-    return '<div class="empty">' + icon('archive') + '<p>' + esc(opts.empty || t('e_no_record')) + '</p></div>';
+    return '<div class="empty">' + emptyArt(opts.emptyKind) + '<p>' + esc(opts.empty || t('e_no_record')) + '</p></div>';
   }
   const head = cols.map((c) =>
     '<th class="' + (c.align === 'right' ? 'right' : '') + '">' + esc(c.label) + '</th>').join('');
@@ -188,7 +188,7 @@ function salesTable(rows, compact) {
       '<div class="actions">' +
         '<button class="btn btn-info btn-sm" data-act="doc-invoice" data-id="' + s.id + '">' +
         icon('invoice') + t('btn_invoice') + '</button></div>' }
-  ], rows, { empty: SALES.length ? t('e_no_sales') : t('e_start_sales', { b:t('btn_new_sale') }), wide:true });
+  ], rows, { empty: SALES.length ? t('e_no_sales') : t('e_start_sales', { b:t('btn_new_sale') }), emptyKind:'sales', wide:true });
 }
 
 /* ==========================================================================
@@ -313,6 +313,26 @@ PAGES.dashboard = function () {
     alerts = '<div class="grid grid-2" style="margin-bottom:16px">' + parts.join('') + '</div>';
   }
 
+  /* Karşılama şeridi: saate göre selam, bugünün özeti ve vitrin çizimi. */
+  const hour = new Date().getHours();
+  const greet = hour < 5 ? 'greet_night' : hour < 12 ? 'greet_morning' : hour < 17 ? 'greet_day' : hour < 22 ? 'greet_evening' : 'greet_night';
+  const todaySales = SALES.filter((s) => s.date >= TODAY).length;
+  const todayPaid = PAYMENTS.filter((p) => p.date >= TODAY).reduce((s, p) => s + p.amount, 0);
+  const hero =
+    '<section class="hero">' +
+      '<div class="hero-text">' +
+        '<div class="hero-greet">' + esc(t(greet)) + '</div>' +
+        '<h3 class="hero-title">' + esc(bizName()) + '</h3>' +
+        '<p class="hero-sub">' + esc(todaySales || todayPaid
+          ? t('hero_today', { n: num(todaySales), a: money(todayPaid) }) : t('hero_quiet')) + '</p>' +
+        '<div class="hero-chips">' +
+          badge(openInv ? 'warning' : 'success', t('hero_open', { n: num(openInv) }), 'invoice') +
+          badge(k.lowCount ? 'warning' : 'muted', t('hero_low', { n: num(k.lowCount) }), 'boxes') +
+        '</div>' +
+      '</div>' +
+      '<div class="hero-art">' + shopArt(t('app_name')) + '</div>' +
+    '</section>';
+
   return {
     html:
       '<div class="page-head">' +
@@ -322,7 +342,7 @@ PAGES.dashboard = function () {
           '<button class="btn btn-ghost" data-act="export">' + icon('download') + t('btn_export') + '</button>' +
           '<button class="btn btn-primary" data-act="new-sale">' + icon('plus') + t('btn_new_sale') + '</button>' +
         '</div>' +
-      '</div>' + alerts +
+      '</div>' + hero + alerts +
 
       '<div class="grid grid-stats" style="margin-bottom:16px">' + stats + '</div>' +
 
@@ -505,13 +525,14 @@ PAGES.faturalar = function () {
             icon('invoice') + t('btn_invoice') + '</button>' +
             actionBtn('printer', t('btn_print'), ' data-act="doc-invoice" data-id="' + s.id + '"') +
           '</div>' }
-      ], SALES, { wide:true, empty:t('e_start_sales', { b:t('btn_new_invoice') }) }) + '</div></section>'
+      ], SALES, { wide:true, emptyKind:'sales', empty:t('e_start_sales', { b:t('btn_new_invoice') }) }) + '</div></section>'
   };
 };
 
 /* --- Ürünler --- */
 PAGES.urunler = function () {
   const totalValue = PRODUCTS.reduce((s, p) => s + p.stock * p.buy, 0);
+  const trends = productTrends(6);
   return {
     html:
       '<div class="page-head"><div><h2>' + esc(t('nav_products')) + '</h2>' +
@@ -523,10 +544,12 @@ PAGES.urunler = function () {
       '<section class="card"><div class="card-body flush">' +
       table([
         { key:'name', label:t('c_product'), render:(p) =>
-          '<span class="cell-main"><span class="thumb">' + icon('package') + '</span>' +
+          '<span class="cell-main"><span class="thumb art">' + catArt(p.cat) + '</span>' +
           '<span><span class="cell-title">' + esc(p.name) + '</span>' +
           '<span class="cell-sub">' + esc(p.sku) + ' · ' + esc(supplierName(p.sup)) + '</span></span></span>' },
         { key:'cat', label:t('c_category'), render:(p) => badge('muted', catLabel(p.cat)) },
+        { key:'trend', label:t('c_trend'), render:(p) =>
+          '<span class="trend-cell">' + sparkline(trends[p.id], CAT_TONES[p.cat] ? CAT_TONES[p.cat][0] : SERIES_1, 84, 26) + '</span>' },
         { key:'buy', label:t('c_buy'), align:'right', render:(p) => '<span class="num">' + money(p.buy) + '</span>' },
         { key:'sell', label:t('c_sell'), align:'right', render:(p) => '<span class="num strong">' + money(p.sell) + '</span>' },
         { key:'margin', label:t('c_margin'), align:'right', render:(p) =>
@@ -538,7 +561,7 @@ PAGES.urunler = function () {
             actionBtn('edit', t('btn_edit'), ' data-act="edit-product" data-id="' + p.id + '"') +
             actionBtn('trash', t('btn_delete'), ' data-act="delete-product" data-id="' + p.id + '"') +
           '</div>' }
-      ], PRODUCTS, { wide:true, empty:t('e_start_products', { b:t('btn_new_product') }) }) + '</div></section>'
+      ], PRODUCTS, { wide:true, emptyKind:'products', empty:t('e_start_products', { b:t('btn_new_product') }) }) + '</div></section>'
   };
 };
 
@@ -566,7 +589,7 @@ PAGES.stok = function () {
       '<section class="card"><div class="card-body flush">' +
       table([
         { key:'name', label:t('c_product'), render:(p) =>
-          '<span class="cell-main"><span class="thumb">' + icon('package') + '</span>' +
+          '<span class="cell-main"><span class="thumb art">' + catArt(p.cat) + '</span>' +
           '<span><span class="cell-title">' + esc(p.name) + '</span>' +
           '<span class="cell-sub">' + esc(p.sku) + ' · ' + esc(supplierName(p.sup)) + '</span></span></span>' },
         { key:'stock', label:t('c_current'), align:'right', render:(p) => {
@@ -620,12 +643,13 @@ PAGES.alislar = function () {
         { key:'total', label:t('c_amount'), align:'right', render:(p) => '<span class="num strong">' + money(p.total) + '</span>' },
         { key:'st', label:t('c_status'), render:(p) => p.paid >= p.total
           ? badge('success', t('b_settled'), 'check') : badge('warning', t('st_partial'), 'clock') }
-      ], PURCHASES, { wide:true, empty:t('e_start_purchases', { b:t('btn_new_purchase') }) }) + '</div></section>'
+      ], PURCHASES, { wide:true, emptyKind:'products', empty:t('e_start_purchases', { b:t('btn_new_purchase') }) }) + '</div></section>'
   };
 };
 
 /* --- Müşteriler --- */
 PAGES.musteriler = function () {
+  const trends = customerTrends(6);
   const rows = CUSTOMERS.map((c) => ({ c:c, s:customerSummary(c.id) }))
                         .sort((a, b) => b.s.remaining - a.s.remaining || b.s.total - a.s.total);
   const totalRem = rows.reduce((s, r) => s + r.s.remaining, 0);
@@ -641,6 +665,7 @@ PAGES.musteriler = function () {
       table([
         { key:'name', label:t('c_customer'), render:(r) => customerLink(r.c) },
         { key:'phone', label:t('c_phone'), render:(r) => ltr(r.c.phone) },
+        { key:'trend', label:t('c_trend'), render:(r) => '<span class="trend-cell">' + sparkline(trends[r.c.id], SERIES_1, 84, 26) + '</span>' },
         { key:'total', label:t('c_total_sales'), align:'right', render:(r) => '<span class="num strong">' + money(r.s.total) + '</span>' },
         { key:'paid', label:t('c_paid'), align:'right', render:(r) =>
           '<span class="num ' + (r.s.paid > 0 ? 'text-success' : 'text-dim') + '">' + money(r.s.paid) + '</span>' },
@@ -658,7 +683,7 @@ PAGES.musteriler = function () {
         { key:'_actions', label:t('c_action'), align:'right', render:(r) =>
           '<div class="actions"><a class="btn btn-ghost btn-sm" href="#/musteri/' + r.c.id + '">' +
           icon('eye') + t('btn_detail') + '</a></div>' }
-      ], rows, { wide:true, empty:t('e_start_customers', { b:t('btn_new_customer') }) }) + '</div></section>'
+      ], rows, { wide:true, emptyKind:'customers', empty:t('e_start_customers', { b:t('btn_new_customer') }) }) + '</div></section>'
   };
 };
 
@@ -790,7 +815,7 @@ PAGES.musteri = function (id) {
                     '<span class="tl-amount ' + (isPay ? 'text-success' : 'text-muted') + '">' +
                       (isPay ? signedMoney(r.amount) : money(r.amount)) + '</span>' +
                   '</div><p class="tl-meta">' + fmtDate(r.date) + ' · ' + esc(r.note) + '</p></div></div>';
-              }).join('') : '<div class="empty">' + icon('wallet') + '<p>' + esc(t('e_no_moves')) + '</p></div>') +
+              }).join('') : '<div class="empty">' + emptyArt('moves') + '<p>' + esc(t('e_no_moves')) + '</p></div>') +
             '</div></div>' +
           '</section>' +
 
@@ -979,7 +1004,7 @@ PAGES.raporlar = function () {
         table([
           { key:'p', label:t('c_product'), render:(r) => {
               const p = productById(r.pid);
-              return '<span class="cell-main"><span class="thumb">' + icon('package') + '</span>' +
+              return '<span class="cell-main"><span class="thumb art">' + catArt(p ? p.cat : 'other') + '</span>' +
                 '<span><span class="cell-title">' + esc(p ? p.name : '—') + '</span>' +
                 '<span class="cell-sub">' + esc(p ? catLabel(p.cat) : '') + '</span></span></span>'; } },
           { key:'qty', label:t('c_qty'), align:'right', render:(r) => '<span class="num">' + num(r.qty) + '</span>' },
