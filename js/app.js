@@ -482,6 +482,7 @@ PAGES.faturalar = function () {
       '<div class="page-head"><div><h2>' + esc(t('nav_invoices')) + '</h2>' +
       '<p class="sub">' + esc(t('p_invoices_sub', { n:num(SALES.length) })) + '</p></div>' +
       '<div class="head-actions">' +
+        '<button class="btn btn-ghost" data-act="verify-doc">' + icon('shield') + t('btn_verify') + '</button>' +
         '<button class="btn btn-primary" data-act="new-invoice">' + icon('plus') + t('btn_new_invoice') + '</button>' +
       '</div></div>' +
       '<section class="card"><div class="card-body flush">' +
@@ -1657,6 +1658,17 @@ document.addEventListener('click', function (ev) {
   if (act === 'doc-invoice')  { invoiceDoc(id); return; }
   if (act === 'doc-receipt')  { receiptDoc(id); return; }
   if (act === 'close-doc')    { closeDoc(); return; }
+  if (act === 'toggle-copy')  {
+    const sh = document.querySelector('.doc-host .sheet');
+    if (!sh) return;
+    const on = sh.classList.toggle('copy');
+    a.classList.toggle('on', on); a.setAttribute('aria-pressed', on ? 'true' : 'false');
+    return;
+  }
+  /* belge doğrulama (js/seal.js) */
+  if (act === 'verify-doc')   { verifyModal(); return; }
+  if (act === 'verify-run')   { runVerify(); return; }
+  if (act === 'verify-open')  { closeModal(); invoiceDoc(id); return; }
   if (act === 'print-doc' || act === 'print') {
     window.print();
     /* Bazı mobil tarayıcılar JavaScript'ten gelen yazdırma isteğini sessizce
@@ -1752,6 +1764,10 @@ document.addEventListener('change', function (ev) {
 document.addEventListener('keydown', function (ev) {
   if (ev.key === 'Escape') {
     closeDoc(); ACTIVE_FORM = null; PENDING_CONFIRM = null; closeModal(); closeNav();
+  }
+  /* doğrulama aracında Enter denetimi başlatır */
+  if (ev.key === 'Enter' && (ev.target.id === 'vfNo' || ev.target.id === 'vfCode')) {
+    ev.preventDefault(); runVerify(); return;
   }
   /* formda Enter kaydeder — çok satırlı alan hariç */
   if (ev.key === 'Enter' && ACTIVE_FORM && ev.target.tagName !== 'TEXTAREA' &&

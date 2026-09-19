@@ -3,6 +3,7 @@
    Belge tamamen seçili dilde üretilir (فارسی / Türkçe / English), yazı yönü
    ve rakam biçimi dile göre; para birimi her dilde Afgani.
    Yazdırıldığında yalnızca belge basılır, arayüz basılmaz.
+   Mühür, kaşe, güvenlik şeridi ve doğrulama kodu js/seal.js'ten gelir.
    ========================================================================== */
 
 /* İşletme bilgileri (ad, adres, vergi no, telefon, e-posta) artık burada
@@ -30,6 +31,7 @@ function docShell(inner) {
   return '<div class="doc-bar">' +
       '<button class="btn btn-ghost" data-act="close-doc">' + icon('x') + t('aria_close') + '</button>' +
       '<div class="spacer"></div>' +
+      '<button class="btn btn-ghost" data-act="toggle-copy" aria-pressed="false">' + icon('copy') + t('inv_copy_toggle') + '</button>' +
       '<button class="btn btn-primary" data-act="print-doc">' + icon('printer') + t('inv_print') + '</button>' +
     '</div>' +
     '<div class="doc-scroll"><article class="sheet">' + inner + '</article></div>';
@@ -51,7 +53,7 @@ function sheetHeader(docTitle, meta) {
         meta.map((m) =>
           '<div class="sheet-meta-row"><span>' + esc(m[0]) + '</span><b>' + m[1] + '</b></div>').join('') +
       '</div>' +
-    '</header>';
+    '</header>' + bandSvg();
 }
 
 function partyBlock(label, lines) {
@@ -93,7 +95,10 @@ function invoiceDoc(saleId) {
         '<td class="e"><b>' + money(p.amount) + '</b></td></tr>').join('')
     : '<tr><td colspan="3" class="sheet-empty">' + esc(t('inv_no_payments')) + '</td></tr>';
 
+  const stamp = saleStamp(sale);
+
   openDoc(docShell(
+    watermarkSvg(t('inv_copy')) +
     sheetHeader(t('inv_title'), [
       [t('inv_no'),   '<span class="mono">' + esc(sale.no) + '</span>'],
       [t('inv_date'), fmtDate(sale.date)],
@@ -132,7 +137,7 @@ function invoiceDoc(saleId) {
         '<div class="sheet-sub-h">' + esc(t('inv_payments')) + '</div>' +
         '<table class="sheet-mini"><tbody>' + payRows + '</tbody></table>' +
       '</div>' +
-      '<div class="sheet-totals">' +
+      '<div class="sheet-totals-wrap"><div class="sheet-totals">' +
         '<div class="stot"><span>' + esc(t('inv_subtotal')) + '</span><b>' + money(st.total) + '</b></div>' +
         '<div class="stot grand"><span>' + esc(t('inv_grand')) + '</span><b>' + money(st.total) + '</b></div>' +
         '<div class="stot"><span>' + esc(t('inv_paid')) + '</span><b class="ink-success">' + money(st.paid) + '</b></div>' +
@@ -140,15 +145,18 @@ function invoiceDoc(saleId) {
           '<b class="' + (st.remaining > 0 ? 'ink-danger' : 'ink-success') + '">' + money(st.remaining) + '</b></div>' +
         '<div class="sheet-status ' + status.tone + '">' + esc(status.label) + '</div>' +
       '</div>' +
+      '<div class="stamp-wrap">' + stampSvg(stamp.text, stamp.tone, fmtDate(sale.date)) + '</div></div>' +
     '</div>' +
 
     '<footer class="sheet-foot">' +
       '<div class="sheet-signs">' +
-        '<div class="sign"><span class="sign-line"></span>' + esc(t('inv_sign_seller')) +
-          '<em>' + esc(staffName(staff)) + '</em></div>' +
+        '<div class="sign sign-seller"><span class="sign-line"></span>' + esc(t('inv_sign_seller')) +
+          '<em>' + esc(staffName(staff)) + '</em>' +
+          '<div class="seal-wrap">' + sealSvg() + '</div></div>' +
         '<div class="sign"><span class="sign-line"></span>' + esc(t('inv_sign_buyer')) +
           '<em>' + esc(customerName(c)) + '</em></div>' +
       '</div>' +
+      verifyStrip(invoiceQrText(sale), invoiceCode(sale)) +
       '<p class="sheet-thanks">' + esc(t('inv_thanks')) + '</p>' +
       '<p class="sheet-legal">' + esc(t('inv_footer')) + '</p>' +
     '</footer>'
@@ -167,6 +175,7 @@ function receiptDoc(paymentId) {
   const st = sale ? saleTotals(sale) : null;
 
   openDoc(docShell(
+    watermarkSvg(t('inv_copy')) +
     sheetHeader(t('inv_receipt'), [
       [t('inv_no'),   '<span class="mono">' + esc(sale ? sale.no : '—') + '</span>'],
       [t('inv_date'), fmtDate(p.date)],
@@ -178,10 +187,11 @@ function receiptDoc(paymentId) {
       partyBlock(t('inv_buyer'),  [esc(customerName(c)), esc(L(c.addr)), ltr(c.phone)]) +
     '</div>' +
 
-    '<div class="receipt-amount">' +
+    '<div class="receipt-amount-wrap"><div class="receipt-amount">' +
       '<span>' + esc(t('inv_paid')) + '</span>' +
       '<strong>' + money(p.amount, true) + '</strong>' +
     '</div>' +
+    '<div class="stamp-wrap">' + stampSvg(t('g_collected'), 'success', fmtDate(p.date)) + '</div></div>' +
 
     (st ? '<table class="sheet-table"><tbody>' +
       '<tr><td>' + esc(t('inv_grand')) + '</td><td class="e"><b>' + money(st.total) + '</b></td></tr>' +
@@ -192,9 +202,11 @@ function receiptDoc(paymentId) {
 
     '<footer class="sheet-foot">' +
       '<div class="sheet-signs">' +
-        '<div class="sign"><span class="sign-line"></span>' + esc(t('inv_sign_seller')) + '</div>' +
+        '<div class="sign sign-seller"><span class="sign-line"></span>' + esc(t('inv_sign_seller')) +
+          '<div class="seal-wrap">' + sealSvg() + '</div></div>' +
         '<div class="sign"><span class="sign-line"></span>' + esc(t('inv_sign_buyer')) + '</div>' +
       '</div>' +
+      verifyStrip(receiptQrText(p, sale), receiptCode(p, sale)) +
       '<p class="sheet-legal">' + esc(t('inv_footer')) + '</p>' +
     '</footer>'
   ));

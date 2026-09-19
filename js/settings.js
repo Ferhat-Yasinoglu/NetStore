@@ -27,7 +27,8 @@ const SETTINGS_DEFAULTS = {
   email:     'info@netstore.af',
   dueDays:   30,   /* yeni satışta önerilen vade */
   lateAlert: 0,    /* vadeden kaç gün önce uyarılsın: 0 = yalnız gecikince */
-  minStock:  5     /* yeni üründe önerilen minimum stok */
+  minStock:  5,    /* yeni üründe önerilen minimum stok */
+  docSecret: ''    /* belge doğrulama anahtarı; ilk faturada üretilir (js/seal.js) */
 };
 
 let SETTINGS = Object.assign({}, SETTINGS_DEFAULTS);
@@ -79,6 +80,11 @@ function normalizeSettings(obj) {
   out.minStock  = intOr(obj.minStock, 0, 1000000, SETTINGS_DEFAULTS.minStock);
   out.lateAlert = LATE_ALERT_DAYS.indexOf(Number(obj.lateAlert)) >= 0
     ? Number(obj.lateAlert) : SETTINGS_DEFAULTS.lateAlert;
+
+  /* Doğrulama anahtarı: yalnız Base32 karakterleri, 16–64 hane; başka her şey
+     boş sayılır ve ilk belgede yeniden üretilir. */
+  out.docSecret = (typeof obj.docSecret === 'string' && /^[0-9A-Z]{16,64}$/.test(obj.docSecret))
+    ? obj.docSecret : '';
 
   return out;
 }

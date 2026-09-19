@@ -2117,6 +2117,59 @@ html[dir='rtl'] .sheet-sub-h { letter-spacing: normal; text-transform: none; }
 .receipt-amount span { font-size: 12.5px; font-weight: 700; color: #15803D; }
 .receipt-amount strong { font-size: 26px; font-weight: 800; color: #15803D; font-variant-numeric: tabular-nums; }
 
+/* --- belge güvenliği: mühür, kaşe, şerit, doğrulama (js/seal.js) --- */
+.sheet { position: relative; overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.sheet .band { display: block; width: 100%; height: 16px; margin: 8px 0 -6px; opacity: 0.85; }
+.sheet-totals-wrap, .receipt-amount-wrap { position: relative; }
+.stamp-wrap {
+  position: absolute; top: -44px; inset-inline-end: -10px;
+  transform: rotate(-9deg);
+  mix-blend-mode: multiply; opacity: 0.94;
+  pointer-events: none;
+}
+html[dir='rtl'] .stamp-wrap { transform: rotate(9deg); }
+.receipt-amount-wrap .stamp-wrap { top: -8px; inset-inline-end: 34%; }
+.sign { position: relative; }
+.seal-wrap {
+  position: absolute; top: -64px; inset-inline-start: 110px;
+  transform: rotate(-7deg);
+  mix-blend-mode: multiply; opacity: 0.92;
+  pointer-events: none;
+}
+html[dir='rtl'] .seal-wrap { transform: rotate(7deg); }
+.sheet .seal { display: block; }
+.sheet .stamp { display: block; }
+
+.sheet-verify {
+  display: flex; align-items: center; gap: 16px;
+  border: 1px dashed #CBD5E1; border-radius: 10px;
+  padding: 10px 14px; margin: 4px 0 0;
+  break-inside: avoid;
+}
+.sheet-verify .qr { flex: none; display: block; }
+.sheet-verify-label {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #475569;
+}
+html[dir='rtl'] .sheet-verify-label { letter-spacing: normal; text-transform: none; }
+.sheet-verify-code {
+  font-size: 21px; font-weight: 800; letter-spacing: 0.14em; color: #0F172A;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  direction: ltr; unicode-bidi: isolate;
+}
+.sheet-verify-hint { font-size: 11px; color: #64748B; margin-top: 2px; }
+.sheet .micro { display: block; width: 100%; height: 8px; margin: 6px 0 12px; opacity: 0.85; }
+
+.sheet .wm { display: none; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.sheet.copy .wm { display: block; }
+.doc-bar [data-act='toggle-copy'].on { background: var(--danger-soft); color: var(--danger); }
+
+/* doğrulama aracı (modal) */
+.vf-facts { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+.vf-facts td { padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.vf-facts td.e { text-align: end; color: var(--text); }
+.vf-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+
 /* alt bilgi */
 .sheet-foot { margin-top: 30px; padding-top: 22px; border-top: 1px solid #E2E8F0; }
 .sheet-signs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; margin-bottom: 22px; }
@@ -2140,6 +2193,13 @@ html[dir='rtl'] .sheet-sub-h { letter-spacing: normal; text-transform: none; }
   .sheet-summary { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .sheet-signs { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .sheet-table { display: block; overflow-x: auto; }
+  .stamp-wrap { top: -26px; inset-inline-end: 0; }
+  .stamp-wrap .stamp { width: 150px; height: 56px; }
+  .seal-wrap { top: -64px; inset-inline-start: auto; inset-inline-end: 0; }
+  .seal-wrap .seal { width: 112px; height: 112px; }
+  .sheet-verify { gap: 12px; }
+  .sheet-verify .qr { width: 76px; height: 76px; }
+  .sheet-verify-code { font-size: 17px; }
   #langSwitch .seg button { padding: 0 8px; min-width: 30px; }
 }
 
@@ -2170,6 +2230,8 @@ html[dir='rtl'] .sheet-sub-h { letter-spacing: normal; text-transform: none; }
   body.doc-open .sheet {
     max-width: none; box-shadow: none; border-radius: 0; padding: 0;
   }
+  body.doc-open .stamp-wrap { inset-inline-end: 6px; }
+  body.doc-open .doc-host { overflow: visible; }
 
   /* belge kapalıyken sayfanın kendisi basılır */
   body:not(.doc-open) .sidebar,
