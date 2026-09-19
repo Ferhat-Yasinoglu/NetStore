@@ -20,6 +20,7 @@ const NAV = [
   { group:'grp_management', items:[
     { id:'personel', key:'nav_staff',    icon:'staff' },
     { id:'indir',    key:'nav_download', icon:'download' },
+    { id:'kilavuz',  key:'nav_docs',     icon:'book', href:'docs/index.html' },
     { id:'ayarlar',  key:'nav_settings', icon:'settings' } ] }
 ];
 
@@ -1471,7 +1472,8 @@ function renderSidebar() {
         const n = kpis().lowCount;
         if (n) b = '<span class="nav-badge">' + num(n) + '</span>';
       }
-      html += '<a class="nav-item' + (active ? ' active' : '') + '" href="#/' + it.id + '">' +
+      /* href verilmişse dış sayfa (kılavuz); yoksa karma rota */
+      html += '<a class="nav-item' + (active ? ' active' : '') + '" href="' + (it.href || '#/' + it.id) + '">' +
         icon(it.icon) + '<span>' + esc(t(it.key)) + '</span>' + b + '</a>';
     });
   });

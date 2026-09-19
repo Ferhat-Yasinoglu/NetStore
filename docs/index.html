@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!-- lang/dir/data-theme yalnızca başlangıç değeridir: <head> içindeki i18n ve
+     tema betikleri, sayfa boyanmadan önce bunları kullanıcının tercihine
+     göre günceller (uygulamayla aynı tercihler paylaşılır). -->
+<html lang="tr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070B16" />
+  <meta name="description" content="NetStore kullanım kılavuzu — stok, satış, müşteri, borç ve tahsilat yönetimi" />
+  <title>NetStore — Kılavuz</title>
+
+  <!-- Uygulamanın kendi tasarım sistemi: aynı tokenlar, aynı bileşenler,
+       aynı tema. Kılavuz uygulamanın bir parçası gibi görünsün diye. -->
+  <link rel="stylesheet" href="../css/netstore.css" />
+  <link rel="stylesheet" href="docs.css" />
+  <link rel="icon" type="image/png" href="../icons/favicon-64.png" />
+  <link rel="apple-touch-icon" href="../icons/icon-192.png" />
+
+  <!-- Dil ve tema katmanları gövdeden ÖNCE: ilk boyama doğru dilde, doğru
+       yönde ve doğru temada olsun. -->
+  <script src="../js/i18n.js"></script>
+  <script src="../js/theme.js"></script>
+  <script>applyLangToDocument(); applyThemeToDocument();</script>
+</head>
+<body>
+
+  <div class="aurora" aria-hidden="true">
+    <span class="aurora-blob a1"></span>
+    <span class="aurora-blob a2"></span>
+    <span class="aurora-blob a3"></span>
+    <span class="aurora-grid"></span>
+  </div>
+
+  <div class="app">
+
+    <!-- ================= İçindekiler ================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <img class="brand-mark" src="../icons/logo-128.png" alt="" aria-hidden="true" />
+        <div style="min-width:0">
+          <div class="brand-name">NetStore</div>
+          <div class="brand-sub" id="brandSub">Kılavuz</div>
+        </div>
+        <button class="icon-btn nav-close" id="btnNavClose" data-nav="close">
+          <span data-icon="x"></span>
+        </button>
+      </div>
+
+      <div class="docs-search">
+        <span class="search-lens" data-icon="search"></span>
+        <input type="search" id="docsSearch" autocomplete="off" />
+      </div>
+
+      <nav class="sidebar-nav" id="toc"></nav>
+
+      <div class="sidebar-foot">
+        <a class="user-chip" href="../index.html#/dashboard" id="appLink">
+          <span class="avatar"><span data-icon="dashboard"></span></span>
+          <span style="min-width:0">
+            <span class="name" id="appLinkName" style="display:block"></span>
+            <span class="role" id="appLinkSub"></span>
+          </span>
+          <span class="chip-caret" data-icon="chevronRight"></span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ================= İçerik ================= -->
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn hamburger" id="btnBurger" data-nav="open">
+          <span data-icon="menu"></span>
+        </button>
+        <div class="topbar-title">
+          <h1 id="pageTitle"></h1>
+          <div class="crumb" id="pageCrumb"></div>
+        </div>
+        <div class="topbar-actions">
+          <div id="langSwitch"></div>
+          <button class="icon-btn theme-btn" id="btnTheme" data-act="toggle-theme">
+            <span class="theme-ico ico-sun" data-icon="sun"></span>
+            <span class="theme-ico ico-moon" data-icon="moon"></span>
+          </button>
+          <a class="icon-btn" id="btnApp" href="../index.html#/dashboard">
+            <span data-icon="dashboard"></span>
+          </a>
+        </div>
+        <span class="scroll-bar" id="scrollBar" aria-hidden="true"></span>
+      </header>
+
+      <main class="page docs-page" id="docs"></main>
+    </div>
+  </div>
+
+  <div class="scrim" data-nav="close" aria-hidden="true"></div>
+
+  <script src="../js/icons.js"></script>
+  <script src="../js/motion.js"></script>
+  <script src="content.js"></script>
+  <script src="docs.js"></script>
+</body>
+</html>

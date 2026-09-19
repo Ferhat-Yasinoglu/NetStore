@@ -1,0 +1,190 @@
+/* ==========================================================================
+   NetStore — Kılavuz sayfası
+
+   Tasarım sistemi ../css/netstore.css'ten geliyor (tokenlar, kenar çubuğu,
+   üst bar, kartlar, uyarılar, tablolar, tema, RTL, baskı). Burada yalnız
+   kılavuza özgü olan şeyler var: okuma tipografisi, adım numaraları,
+   arayüz etiketi rozetleri ve içindekiler vurgusu.
+   ========================================================================== */
+
+/* --- içindekiler arama kutusu --- */
+.docs-search {
+  position: relative;
+  padding: 12px 12px 4px;
+  flex: none;
+}
+.docs-search .search-lens { inset-inline-start: 24px; top: 32px; }
+.docs-search input {
+  width: 100%;
+  height: 38px;
+  padding-inline: 34px 12px;
+  border-radius: var(--r-md);
+  background: var(--glass-soft);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color var(--t), background var(--t), box-shadow var(--t);
+}
+.docs-search input::placeholder { color: var(--text-3); }
+.docs-search input:focus {
+  outline: none;
+  border-color: var(--border-accent);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+}
+
+/* aramada eşleşmeyen başlıklar solar, kaybolmaz: kullanıcı yerini kaybetmesin */
+.nav-item.dim { opacity: 0.32; }
+.toc-count {
+  font-size: 11px; color: var(--text-3); padding: 6px 10px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- okuma alanı --- */
+.docs-page { max-width: 960px; }
+
+.doc-intro { margin-bottom: 22px; }
+.doc-intro h2 {
+  font-size: 30px; letter-spacing: -0.034em; font-weight: 750;
+  background: linear-gradient(120deg, #FFFFFF 20%, #CBD5E1 70%, #C4B5FD 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+html[data-theme='light'] .doc-intro h2 {
+  background: linear-gradient(120deg, #0B1220 25%, #334155 62%, #6D28D9 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.doc-intro p { font-size: 15px; color: var(--text-2); margin-top: 6px; max-width: 62ch; }
+.doc-intro .chip-row { margin-top: 14px; }
+
+/* bölüm = kart; başlıkta ikon karesi */
+.doc-section { margin-bottom: 18px; scroll-margin-top: calc(var(--topbar-h) + 16px); }
+.doc-section .card-head { align-items: flex-start; padding: 20px 22px; }
+.doc-section .sec-ico {
+  width: 42px; height: 42px; border-radius: 13px; flex: none;
+  display: grid; place-items: center;
+  background: var(--g-accent); color: #fff;
+  box-shadow: 0 8px 20px -10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.doc-section .sec-ico svg { width: 19px; height: 19px; }
+.doc-section h2 { font-size: 20px; letter-spacing: -0.026em; font-weight: 750; }
+.doc-section .lead { font-size: 13.5px; color: var(--text-2); margin-top: 4px; max-width: 70ch; }
+.doc-section .card-body { padding: 6px 22px 22px; }
+
+/* metin ritmi */
+.doc-body { font-size: 14.5px; line-height: 1.7; color: var(--text-2); }
+html[dir='rtl'] .doc-body { line-height: 1.95; font-size: 15px; }
+.doc-body > * + * { margin-top: 14px; }
+.doc-body p { max-width: 74ch; }
+.doc-body h3 {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin-top: 24px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  letter-spacing: -0.012em;
+}
+.doc-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.doc-body strong { color: var(--text); }
+
+/* arayüz etiketi: düğme / menü / alan adı */
+.doc-body .ui {
+  display: inline-block;
+  padding: 0 7px; border-radius: 7px;
+  background: var(--accent-soft); color: var(--accent-hover);
+  border: 1px solid var(--border-accent);
+  font-weight: 650; font-size: 0.92em; line-height: 1.55;
+  white-space: nowrap; vertical-align: baseline;
+}
+.doc-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em; padding: 1px 6px; border-radius: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); white-space: nowrap;
+  direction: ltr; unicode-bidi: isolate;
+}
+.doc-body .arrow { color: var(--text-3); padding: 0 2px; }
+
+/* adımlar: gradyan numara halkası */
+.doc-body ol.steps { list-style: none; padding: 0; margin: 14px 0 0; counter-reset: step; }
+.doc-body ol.steps li {
+  position: relative; padding-inline-start: 42px; padding-block: 5px;
+  counter-increment: step; max-width: 74ch;
+}
+.doc-body ol.steps li::before {
+  content: counter(step);
+  position: absolute; inset-inline-start: 0; top: 4px;
+  width: 28px; height: 28px; border-radius: 99px;
+  display: grid; place-items: center;
+  background: var(--g-accent); color: #fff;
+  font-size: 12.5px; font-weight: 750; font-variant-numeric: tabular-nums;
+  box-shadow: 0 6px 14px -8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+html[dir='rtl'] .doc-body ol.steps li::before { content: counter(step, persian); }
+.doc-body ol.steps li + li::after {
+  content: ''; position: absolute; inset-inline-start: 13.5px; top: -14px;
+  height: 18px; width: 1px; background: var(--border-strong);
+}
+
+.doc-body ul.list { padding-inline-start: 20px; margin: 10px 0 0; max-width: 74ch; }
+.doc-body ul.list li { padding-block: 3px; }
+.doc-body ul.list li::marker { color: var(--accent-hover); }
+
+/* uyarılar: uygulamanın .alert bileşeni; burada yalnız aralık */
+.doc-body .alert { max-width: 78ch; }
+.doc-body .alert strong { display: inline; margin: 0; }
+
+/* tablolar: uygulamanın table.data'sı; kılavuzda dar sütun yeter */
+.doc-body .table-wrap { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.doc-body table.data { min-width: 0; }
+.doc-body table.data td { color: var(--text-2); }
+.doc-body table.data td:first-child { color: var(--text); font-weight: 600; }
+
+/* alt bilgi */
+.doc-foot {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 18px 4px 8px; margin-top: 8px;
+  font-size: 12px; color: var(--text-3);
+  border-top: 1px solid var(--border);
+}
+.doc-foot .spacer { flex: 1; }
+
+/* başa dön */
+.to-top {
+  position: fixed; inset-inline-end: 20px; bottom: 20px; z-index: 50;
+  width: 42px; height: 42px; border-radius: 99px;
+  display: grid; place-items: center;
+  background: var(--glass-strong); border: 1px solid var(--border-strong);
+  color: var(--text-2); box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  opacity: 0; transform: translateY(10px); pointer-events: none;
+  transition: opacity var(--t), transform var(--t), color var(--t), border-color var(--t);
+}
+.to-top.on { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { color: var(--accent-hover); border-color: var(--border-accent); }
+.to-top svg { width: 18px; height: 18px; transform: rotate(90deg); }
+
+/* --- telefon --- */
+@media (max-width: 720px) {
+  .doc-intro h2 { font-size: 25px; }
+  .doc-section .card-head { padding: 16px; }
+  .doc-section .card-body { padding: 4px 16px 18px; }
+  .doc-body { font-size: 14px; }
+  .doc-body ol.steps li { padding-inline-start: 38px; }
+  .doc-body ol.steps li::before { width: 26px; height: 26px; font-size: 12px; }
+  .to-top { inset-inline-end: 14px; bottom: 14px; }
+}
+
+/* --- baskı: kılavuz bir el kitabı gibi basılsın --- */
+@media print {
+  .to-top, .docs-search { display: none !important; }
+  /* Kaydırılmadan yazdırılan bölümler henüz .reveal almamıştır; satır içi opacity:0 kalır. */
+  .doc-section { opacity: 1 !important; animation: none !important; transform: none !important; }
+  .doc-section { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
+  .doc-intro h2, .doc-section h2 {
+    background: none !important; -webkit-text-fill-color: #0F172A !important; color: #0F172A !important;
+  }
+  .doc-body .ui { background: #F1F5F9 !important; color: #0F172A !important; border-color: #CBD5E1 !important; }
+  .doc-body ol.steps li::before { background: #E2E8F0 !important; color: #0F172A !important; box-shadow: none !important; }
+  .doc-section .sec-ico { background: #F1F5F9 !important; color: #0F172A !important; box-shadow: none !important; }
+}

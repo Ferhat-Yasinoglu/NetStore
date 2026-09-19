@@ -32,6 +32,7 @@ const I18N = {
   nav_reports:     { tr:'Raporlar',            en:'Reports',             fa:'گزارش‌ها' },
   nav_staff:       { tr:'Personel',            en:'Staff',               fa:'کارمندان' },
   nav_settings:    { tr:'Ayarlar',             en:'Settings',            fa:'تنظیمات' },
+  nav_docs:        { tr:'Kılavuz',             en:'Guide',               fa:'راهنما' },
 
   grp_inventory:   { tr:'Envanter',            en:'Inventory',           fa:'انبار' },
   grp_operations:  { tr:'İşlemler',            en:'Operations',          fa:'عملیات' },
