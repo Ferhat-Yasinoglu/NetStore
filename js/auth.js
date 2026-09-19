@@ -35,6 +35,7 @@ function hideAuth() {
 
 function authHTML(state, o) {
   const brand =
+    '<div class="auth-art">' + shopArt(t('app_name')) + '</div>' +
     '<div class="auth-brand">' +
       '<img class="brand-mark" src="icons/logo-128.png" alt="" aria-hidden="true">' +
       '<div><div class="auth-name">' + esc(t('app_name')) + '</div>' +
