@@ -598,7 +598,29 @@ const I18N = {
   inv_print:       { tr:'Yazdır / PDF',        en:'Print / PDF',         fa:'چاپ / پی‌دی‌اف' },
   inv_biz_name:    { tr:'NetStore Elektronik', en:'NetStore Electronics', fa:'الکترونیک نت‌ستور' },
   inv_biz_addr:    { tr:'Şar-e Naw, Kabil / Afganistan', en:'Shar-e Naw, Kabul / Afghanistan', fa:'شهر نو، کابل / افغانستان' },
-  inv_tax:         { tr:'Vergi No',            en:'Tax No',              fa:'شماره مالیاتی' }
+  inv_tax:         { tr:'Vergi No',            en:'Tax No',              fa:'شماره مالیاتی' },
+  /* belge güvenliği: mühür, kaşe, doğrulama (js/seal.js) */
+  inv_seal_word:   { tr:'RESMİ MÜHÜR', en:'OFFICIAL SEAL', fa:'مهر رسمی' },
+  inv_original:    { tr:'ASIL', en:'ORIGINAL', fa:'اصل' },
+  inv_copy:        { tr:'KOPYA', en:'COPY', fa:'کاپی' },
+  inv_copy_toggle: { tr:'Kopya işareti', en:'Copy mark', fa:'نشان کاپی' },
+  inv_verify_code: { tr:'Doğrulama Kodu', en:'Verification Code', fa:'کد تأیید' },
+  inv_verify_hint: { tr:'Belgenin aslı olup olmadığını anlamak için karekodu telefon kamerasıyla okutun ya da uygulamada Faturalar → Belge Doğrula bölümüne numarayı ve kodu girin.',
+                     en:'To check that this document is genuine, scan the QR code with a phone camera or enter the number and code under Invoices → Verify Document in the app.',
+                     fa:'برای اطمینان از اصل بودن سند، کد QR را با کمرهٔ موبایل بخوانید یا در برنامه در بخش فاکتورها ← تأیید سند شماره و کد را وارد کنید.' },
+  stamp_paid:      { tr:'ÖDENDİ', en:'PAID', fa:'پرداخت شد' },
+  stamp_partial:   { tr:'KISMİ ÖDENDİ', en:'PARTIALLY PAID', fa:'پرداخت جزئی' },
+  stamp_pending:   { tr:'ÖDENMEDİ', en:'UNPAID', fa:'پرداخت نشده' },
+  stamp_late:      { tr:'VADESİ GEÇTİ', en:'OVERDUE', fa:'معوق' },
+  btn_verify:      { tr:'Belge Doğrula', en:'Verify Document', fa:'تأیید سند' },
+  vf_title:        { tr:'Belge Doğrula', en:'Verify Document', fa:'تأیید سند' },
+  vf_hint:         { tr:'Kâğıt belgedeki fatura numarasını ve 8 haneli doğrulama kodunu girin.', en:'Enter the invoice number and the 8-character verification code printed on the paper document.', fa:'شماره فاکتور و کد تأیید ۸ رقمی چاپ‌شده روی سند کاغذی را وارد کنید.' },
+  vf_check:        { tr:'Doğrula', en:'Verify', fa:'تأیید' },
+  vf_ok:           { tr:'Belge doğrulandı — defterdeki kayıtla birebir uyuşuyor.', en:'Document verified — it matches the ledger record exactly.', fa:'سند تأیید شد — با رکورد دفتر کاملاً مطابقت دارد.' },
+  vf_ok_receipt:   { tr:'Tahsilat fişi doğrulandı — aşağıdaki tahsilata ait.', en:'Payment receipt verified — it belongs to the payment below.', fa:'رسید دریافتی تأیید شد — مربوط به دریافتی زیر است.' },
+  vf_bad_code:     { tr:'Kod uyuşmuyor — belge üzerinde oynanmış ya da kod yanlış yazılmış olabilir.', en:'The code does not match — the document may have been altered or the code mistyped.', fa:'کد مطابقت ندارد — ممکن است سند دستکاری شده یا کد اشتباه نوشته شده باشد.' },
+  vf_compare:      { tr:'Defterdeki asıl değerler aşağıda; kâğıttakiyle karşılaştırın.', en:'The real values from the ledger are below; compare them with the paper.', fa:'مقادیر اصلی دفتر در زیر است؛ با کاغذ مقایسه کنید.' },
+  vf_not_found:    { tr:'Bu numarada kayıt yok — belge bu dükkânda düzenlenmemiş olabilir.', en:'No record with this number — the document may not have been issued by this shop.', fa:'رکوردی با این شماره نیست — ممکن است سند در این دکان صادر نشده باشد.' },
 };
 
 /* ==========================================================================
