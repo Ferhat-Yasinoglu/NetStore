@@ -119,10 +119,10 @@ function verifyDoc(noRaw, codeRaw) {
     dilden bağımsız kısa satır. */
 function invoiceQrText(sale) {
   const st = saleTotals(sale);
-  return 'NETSTORE|INV|' + sale.no + '|' + isoLocal(sale.date) + '|' + amountKey(st.total) + ' AFN|' + invoiceCode(sale);
+  return 'NETSTORE|INV|' + sale.no + '|' + isoLocal(sale.date) + '|' + amountKey(st.total) + ' ' + currencyLabel() + '|' + invoiceCode(sale);
 }
 function receiptQrText(p, sale) {
-  return 'NETSTORE|RCPT|' + (sale ? sale.no : '-') + '|' + isoLocal(p.date) + '|' + amountKey(p.amount) + ' AFN|' + receiptCode(p, sale);
+  return 'NETSTORE|RCPT|' + (sale ? sale.no : '-') + '|' + isoLocal(p.date) + '|' + amountKey(p.amount) + ' ' + currencyLabel() + '|' + receiptCode(p, sale);
 }
 
 /** Karekodu tek bir <path> ile çizer — yazdırmada keskin kalır. */

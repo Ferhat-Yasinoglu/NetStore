@@ -66,7 +66,7 @@ function revealPage(host) {
    2. Sayaç
 
    `data-count` taşıyan kutular sıfırdan hedefe sayılır. Biçimlendirme i18n'e
-   bırakılır: para AFN/افغانی, rakamlar seçili dilin rakam kümesinde çıkar.
+   bırakılır: para birimi yazısı (AFG/؋/افغانی…), rakamlar seçili dilin rakam kümesinde çıkar.
    Bitişte hedef değer bir kez daha yazılır — yuvarlama hatası kalmasın.
    -------------------------------------------------------------------------- */
 

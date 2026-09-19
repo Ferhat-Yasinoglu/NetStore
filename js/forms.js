@@ -285,7 +285,7 @@ function newSaleForm(presetCustomerId) {
           '<div class="line-host" id="lineHost"></div>' +
         '</div>' },
       { id:'due', label:t('fld_due_days'), type:'number', value:setting('dueDays'), min:0, step:1, half:true },
-      { id:'prepay', label:t('fld_prepay', { c: langMeta().currency }), type:'number', value:0, min:0, step:1,
+      { id:'prepay', label:t('fld_prepay', { c: currencyLabel() }), type:'number', value:0, min:0, step:1,
         half:true, hint:t('fld_prepay_h') },
       { id:'method', label:t('m_method'), type:'select', options:optMethods() }
     ],
@@ -372,8 +372,8 @@ function productForm(id) {
       { id:'name', label:t('fld_prod_name'), type:'text', value:p ? p.name : '' },
       { id:'sku', label:t('fld_sku'), type:'text', value:p ? p.sku : '', half:true },
       { id:'cat', label:t('fld_category'), type:'select', options:optCategories(), value:p ? p.cat : 'phone', half:true },
-      { id:'buy', label:t('fld_buy', { c: langMeta().currency }), type:'number', value:p ? p.buy : '', min:0, step:1, half:true },
-      { id:'sell', label:t('fld_sell', { c: langMeta().currency }), type:'number', value:p ? p.sell : '', min:0, step:1, half:true },
+      { id:'buy', label:t('fld_buy', { c: currencyLabel() }), type:'number', value:p ? p.buy : '', min:0, step:1, half:true },
+      { id:'sell', label:t('fld_sell', { c: currencyLabel() }), type:'number', value:p ? p.sell : '', min:0, step:1, half:true },
       { id:'stock', label:t('fld_stock'), type:'number', value:p ? p.stock : 0, min:0, step:1, half:true },
       { id:'min', label:t('fld_min'), type:'number', value:p ? p.min : setting('minStock'), min:0, step:1, half:true },
       { id:'sup', label:t('fld_supplier'), type:'select', options:optSuppliers(), value:p ? p.sup : SUPPLIERS[0] }
@@ -533,7 +533,7 @@ function newPurchaseForm() {
           '</div>' +
           '<div class="line-host" id="lineHost"></div>' +
         '</div>' },
-      { id:'paid', label:t('fld_paid_amount', { c: langMeta().currency }), type:'number', value:0, min:0, step:1 }
+      { id:'paid', label:t('fld_paid_amount', { c: currencyLabel() }), type:'number', value:0, min:0, step:1 }
     ],
     onMount: function () { LINE_MODE = 'cost'; refreshLines(); },
     onSubmit: function (v) {
