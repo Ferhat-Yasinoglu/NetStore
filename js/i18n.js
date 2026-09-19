@@ -2,13 +2,13 @@
    NetStore — çok dilli katman (فارسی / Türkçe / English)
    Dil seçimi yazı yönünü (RTL/LTR), sayı biçimini, tarih biçimini ve
    para birimi yazımını birlikte değiştirir.
-   Para birimi: Afgani (AFN) — Farsça yazımı افغانی
+   Para birimi: Afgani — tutarın yanındaki yazı Ayarlar'dan seçilir (AFG, ؋, Af, AFN ya da kelime)
    ========================================================================== */
 
 const LANGS = {
-  fa: { name:'دری',      short:'فا', dir:'rtl', locale:'fa-AF', currency:'افغانی', digits:'arabext' },
-  tr: { name:'Türkçe',   short:'TR', dir:'ltr', locale:'tr-TR', currency:'AFN',    digits:'latn' },
-  en: { name:'English',  short:'EN', dir:'ltr', locale:'en-GB', currency:'AFN',    digits:'latn' }
+  fa: { name:'دری',      short:'فا', dir:'rtl', locale:'fa-AF', currencyWord:'افغانی',  digits:'arabext' },
+  tr: { name:'Türkçe',   short:'TR', dir:'ltr', locale:'tr-TR', currencyWord:'Afgani',  digits:'latn' },
+  en: { name:'English',  short:'EN', dir:'ltr', locale:'en-GB', currencyWord:'Afghani', digits:'latn' }
 };
 
 const LANG_KEY = 'netstore-lang';
@@ -362,7 +362,10 @@ const I18N = {
   s_biz_name:      { tr:'İşletme Adı',         en:'Business Name',       fa:'نام کسب‌وکار' },
   s_tax_no:        { tr:'Vergi No',            en:'Tax Number',          fa:'شماره مالیاتی' },
   s_currency:      { tr:'Para Birimi',         en:'Currency',            fa:'واحد پول' },
-  s_currency_afn:  { tr:'Afgani (AFN)',        en:'Afghani (AFN)',       fa:'افغانی (AFN)' },
+  s_cur_symbol:    { tr:'؋ — Afgani simgesi',  en:'؋ — afghani sign',    fa:'؋ — نماد افغانی' },
+  s_cur_iso:       { tr:'AFN — ISO kodu',      en:'AFN — ISO code',      fa:'AFN — کد ISO' },
+  s_cur_word:      { tr:'Kelime: Afgani / افغانی', en:'Word: Afghani / افغانی', fa:'کلمه: افغانی' },
+  s_cur_hint:      { tr:'Tutarların yanındaki yazı — ekranlar, faturalar ve fişler dâhil.', en:'The text shown next to amounts — screens, invoices and receipts included.', fa:'نوشتهٔ کنار مبلغ‌ها — در صفحات، فاکتورها و رسیدها.' },
   s_default_due:   { tr:'Varsayılan Vade (gün)', en:'Default Due (days)', fa:'سررسید پیش‌فرض (روز)' },
   s_late_alert:    { tr:'Gecikme Uyarısı',     en:'Overdue Alert',       fa:'هشدار تأخیر' },
   s_on_due:        { tr:'Vade gününde',        en:'On due date',         fa:'در روز سررسید' },
@@ -710,13 +713,20 @@ function num(v) { return _nf({ maximumFractionDigits: 0 }).format(v || 0); }
 /**
  * Para. Birim her dilde Afgani'dir; yazımı dile göre değişir:
  *   dری   → ۱٬۲۳۴ افغانی
- *   tr/en → 1.234 AFN
+ *   tr/en → 1.234 AFG (yazı Ayarlar'dan: AFG / ؋ / Af / AFN / kelime)
  */
+/* Tutarın yanındaki para birimi yazısı. Ayarlar → Para Birimi'nden seçilir;
+   'word' seçili dilin kelimesini verir (Afgani / Afghani / افغانی). */
+function currencyLabel() {
+  const v = (typeof SETTINGS !== 'undefined' && SETTINGS.curLabel) || 'AFG';
+  return v === 'word' ? LANGS[LANG].currencyWord : v;
+}
+
 function money(v, exact) {
   const n = _nf(exact
     ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
     : { maximumFractionDigits: 0 }).format(v || 0);
-  return n + ' ' + LANGS[LANG].currency;
+  return n + ' ' + currencyLabel();
 }
 
 /** İşaretli para — çift yönlü metinde bozulmasın diye <bdi> ile yalıtılır. */

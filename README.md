@@ -12,7 +12,7 @@ sisteminin tercihine uyulur.
 faturaları ve tahsilat fişlerini kapsar; Farsça seçildiğinde düzen sağdan sola
 döner, rakamlar Fars rakamlarına (۰۱۲۳) geçer.
 
-**Para birimi:** Afgani — Farsça `افغانی`, Türkçe/İngilizce `AFN`.
+**Para birimi:** Afgani — tutarın yanındaki yazı Ayarlar'dan seçilir: `AFG` (varsayılan), `؋`, `Af`, `AFN` ya da kelime (`Afgani` / `افغانی`).
 
 **Kayıtlar kalıcıdır:** girdiğiniz her şey tarayıcıda saklanır, sayfa yenilense de
 durur. İlk açılışta örnek veri yüklü gelir; Ayarlar → Veri bölümünden **Sıfırdan

@@ -1198,8 +1198,12 @@ PAGES.ayarlar = function () {
           '<section class="card"><div class="card-head"><div><h3>' + esc(t('h_finance')) + '</h3>' +
           '<p class="sub">' + esc(t('h_finance_sub')) + '</p></div></div>' +
           '<div class="card-body">' +
-            '<div class="field"><label>' + esc(t('s_currency')) + '</label>' +
-            '<select><option selected>' + esc(t('s_currency_afn')) + '</option></select></div>' +
+            '<div class="field"><label for="set-curLabel">' + esc(t('s_currency')) + '</label>' +
+            '<select id="set-curLabel">' +
+              [['AFG', 'AFG'], ['\u060B', t('s_cur_symbol')], ['Af', 'Af'], ['AFN', t('s_cur_iso')], ['word', t('s_cur_word')]].map(([v, l]) =>
+                '<option value="' + v + '"' + (setting('curLabel') === v ? ' selected' : '') +
+                '>' + esc(l) + '</option>').join('') +
+            '</select><p class="hint">' + esc(t('s_cur_hint')) + '</p></div>' +
             field(t('s_default_due'), 'number', setting('dueDays'), 'set-dueDays',
                   { min: 0, step: 1 }) +
             '<div class="field"><label for="set-lateAlert">' + esc(t('s_late_alert')) + '</label>' +
@@ -1309,7 +1313,9 @@ function saveSettingsForm() {
     email:     email,
     dueDays:   due,
     minStock:  min,
-    lateAlert: Number(val('set-lateAlert'))
+    lateAlert: Number(val('set-lateAlert')),
+    curLabel:  val('set-curLabel'),
+    docSecret: setting('docSecret')
   });
 
   saveSettings();
@@ -1605,7 +1611,7 @@ function paymentModal(custId) {
       openSales.map((s) => '<option value="' + s.id + '">' +
         esc(t('m_opt_rem', { no: s.no, v: money(saleTotals(s).remaining) })) + '</option>').join('') +
       '</select></div>' +
-      '<div class="field"><label>' + esc(t('m_amount', { c: langMeta().currency })) + '</label>' +
+      '<div class="field"><label>' + esc(t('m_amount', { c: currencyLabel() })) + '</label>' +
       '<input type="number" id="pmAmount" min="1" step="1" value="' +
       (openSales.length ? Math.round(saleTotals(openSales[0]).remaining) : 0) + '">' +
       '<p class="hint">' + esc(t('m_hint_max')) + '</p></div>' +

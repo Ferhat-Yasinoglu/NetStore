@@ -5,7 +5,7 @@
 
    Çok dillilik: kayıtlarda ETİKET ANAHTARI tutulur ('phone', 'cash', …),
    ekranda i18n ile çevrilir. Özel adlar iki yazımda saklanır (Latin / فارسی).
-   Para birimi: Afgani (AFN / افغانی).
+   Para birimi: Afgani (yazımı Ayarlar'dan: AFG / ؋ / Af / AFN / افغانی).
    ========================================================================== */
 
 /* --- bugün ---
@@ -42,7 +42,7 @@ function pick(arr) { return arr[Math.floor(rnd() * arr.length)]; }
 function between(a, b) { return a + Math.floor(rnd() * (b - a + 1)); }
 
 /* ==========================================================================
-   Ana kayıtlar — fiyatlar Afgani (AFN)
+   Ana kayıtlar — fiyatlar Afgani
    ========================================================================== */
 
 const PRODUCTS = [
