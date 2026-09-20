@@ -28,6 +28,49 @@ function L(v) {
 function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
 function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 
+/** n ay sonrası. Ayın son günü taşarsa (31 Ocak + 1 ay) ayın sonuna oturur. */
+function addMonths(d, n) {
+  const x = new Date(d), day = x.getDate();
+  x.setDate(1);
+  x.setMonth(x.getMonth() + n);
+  x.setDate(Math.min(day, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate()));
+  return x;
+}
+
+/* --------------------------------------------------------------------------
+   Garanti
+
+   Her ürünün garanti süresi ay cinsindendir; ürüne yazılmamışsa Ayarlar'daki
+   varsayılan kullanılır. 0 ay = garantisiz (sarf malzemesi, aksesuar…).
+   -------------------------------------------------------------------------- */
+
+function productWarranty(p) {
+  if (!p) return 0;
+  if (typeof p.warranty === 'number' && isFinite(p.warranty)) return Math.max(0, Math.round(p.warranty));
+  return typeof setting === 'function' ? setting('warrantyMonths') : 12;
+}
+
+/** Satıştaki garantili kalemler: [{ product, qty, months, end, serial }] */
+function warrantyItems(sale) {
+  if (!sale) return [];
+  return sale.items.map(function (it) {
+    const p = productById(it.pid);
+    const months = productWarranty(p);
+    return {
+      product: p, pid: it.pid, qty: it.qty, months: months,
+      end: addMonths(sale.date, months),
+      serial: (sale.serials && sale.serials[it.pid]) || ''
+    };
+  }).filter(function (x) { return x.months > 0; });
+}
+
+/** Satışın garantisi en geç biten kalemi; garantili kalem yoksa null. */
+function warrantyEnd(sale) {
+  const items = warrantyItems(sale);
+  if (!items.length) return null;
+  return items.reduce(function (a, x) { return x.end > a ? x.end : a; }, items[0].end);
+}
+
 /* --- deterministik rastgelelik (her yüklemede aynı veri) --- */
 function mulberry32(seed) {
   return function () {

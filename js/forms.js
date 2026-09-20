@@ -376,6 +376,8 @@ function productForm(id) {
       { id:'sell', label:t('fld_sell', { c: currencyLabel() }), type:'number', value:p ? p.sell : '', min:0, step:1, half:true },
       { id:'stock', label:t('fld_stock'), type:'number', value:p ? p.stock : 0, min:0, step:1, half:true },
       { id:'min', label:t('fld_min'), type:'number', value:p ? p.min : setting('minStock'), min:0, step:1, half:true },
+      { id:'warranty', label:t('fld_warranty'), type:'number',
+        value: p ? productWarranty(p) : setting('warrantyMonths'), min:0, step:1, half:true },
       { id:'sup', label:t('fld_supplier'), type:'select', options:optSuppliers(), value:p ? p.sup : SUPPLIERS[0] }
     ],
     onSubmit: function (v) {
@@ -388,12 +390,14 @@ function productForm(id) {
       if (!vNumber(v.sell, t('fld_sell', { c:'' }), { positive: true })) return false;
       if (!vNumber(v.stock, t('fld_stock'), { min: 0 })) return false;
       if (!vNumber(v.min, t('fld_min'), { min: 0 })) return false;
+      if (!vNumber(v.warranty, t('fld_warranty'), { min: 0 })) return false;
 
       const rec = p || { id: nextId(PRODUCTS, 'p') };
       Object.assign(rec, {
         name: v.name, sku: v.sku, cat: v.cat, sup: v.sup,
         buy: Number(v.buy), sell: Number(v.sell),
-        stock: Number(v.stock), min: Number(v.min)
+        stock: Number(v.stock), min: Number(v.min),
+        warranty: Number(v.warranty)
       });
       if (!p) PRODUCTS.push(rec);
 
@@ -703,4 +707,44 @@ function lineQty(i, value) {
   const q = Math.max(1, Math.floor(Number(value) || 1));
   if (SALE_LINES[i]) SALE_LINES[i].qty = q;
   refreshLineTotals();
+}
+/* --------------------------------------------------------------------------
+   Garanti belgesi — seri numarası girişi
+
+   Seri no satış anında değil, kutu elden çıkarken okunur. Bu yüzden numara
+   satış formunda değil, belge açılırken sorulur; girilen değerler satışa
+   yazılır ve belge her açılışında hazır gelir.
+   -------------------------------------------------------------------------- */
+function warrantyForm(saleId) {
+  const sale = saleById(saleId);
+  if (!sale) { toast(t('e_no_record'), 'warning'); return; }
+
+  const items = warrantyItems(sale);
+  if (!items.length) { toast(t('wf_none'), 'info'); return; }
+
+  formModal({
+    title: t('wf_title'),
+    sub: t('wf_sub'),
+    submitLabel: t('wf_open'),
+    icon: 'shield',
+    fields: items.map((x, i) => ({
+      id: 'sn' + i,
+      label: (x.product ? x.product.name : '—') + ' · ' + t('wr_months', { n: num(x.months) }),
+      type: 'text',
+      value: x.serial,
+      hint: x.product ? x.product.sku : ''
+    })),
+    onSubmit: function (v) {
+      const map = Object.assign({}, sale.serials || {});
+      items.forEach((x, i) => {
+        const s = String(v['sn' + i] || '').trim().slice(0, 40);
+        if (s) map[x.pid] = s; else delete map[x.pid];
+      });
+      sale.serials = map;
+      commit();
+      /* Modal kapandıktan sonra belgeyi aç: ikisi aynı anda açık kalmasın. */
+      setTimeout(function () { warrantyDoc(sale.id); }, 0);
+      return true;
+    }
+  });
 }

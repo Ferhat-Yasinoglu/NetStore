@@ -186,6 +186,7 @@ function salesTable(rows, compact) {
     { key:'st', label:t('c_status'), render:(s) => statusBadge(saleStatus(s)) },
     { key:'_actions', label:t('c_action'), align:'right', render:(s) =>
       '<div class="actions">' +
+        actionBtn('shield', t('btn_warranty'), ' data-act="doc-warranty" data-id="' + s.id + '"') +
         '<button class="btn btn-info btn-sm" data-act="doc-invoice" data-id="' + s.id + '">' +
         icon('invoice') + t('btn_invoice') + '</button></div>' }
   ], rows, { empty: SALES.length ? t('e_no_sales') : t('e_start_sales', { b:t('btn_new_sale') }), emptyKind:'sales', wide:true });
@@ -758,6 +759,9 @@ PAGES.musteri = function (id) {
                 icon('plus') + t('btn_new_sale') + '</button>' +
               (s.sales.length ? '<button class="btn btn-info" data-act="doc-invoice" data-id="' + s.sales[0].id + '">' +
                 icon('invoice') + t('btn_invoice') + '</button>' : '') +
+              (s.sales.length && warrantyItems(s.sales[0]).length
+                ? '<button class="btn btn-ghost" data-act="doc-warranty" data-id="' + s.sales[0].id + '">' +
+                  icon('shield') + t('btn_warranty') + '</button>' : '') +
               '<a class="btn btn-whatsapp" href="' + waLink + '" target="_blank" rel="noopener">' +
                 icon('whatsapp') + t('btn_whatsapp') + '</a>' +
               '<a class="btn btn-primary" href="' + mailLink + '">' + icon('mail') + t('btn_email') + '</a>' +
@@ -1225,6 +1229,13 @@ PAGES.ayarlar = function () {
                   { min: 0, step: 1 }) +
           '</div></section>' +
 
+          '<section class="card"><div class="card-head"><div><h3>' + esc(t('s_warranty')) + '</h3>' +
+          '<p class="sub">' + esc(t('s_warranty_sub')) + '</p></div></div>' +
+          '<div class="card-body">' +
+            field(t('s_warranty_def'), 'number', setting('warrantyMonths'), 'set-warrantyMonths',
+                  { min: 0, step: 1, hint: t('s_warranty_hint') }) +
+          '</div></section>' +
+
           cloudCard() +
 
           installCard() +
@@ -1294,6 +1305,12 @@ function saveSettingsForm() {
     return;
   }
 
+  const wmonths = Number(val('set-warrantyMonths'));
+  if (!isFinite(wmonths) || wmonths < 0) {
+    toast(t('v_number', { f: t('s_warranty_def') }), 'warning');
+    return;
+  }
+
   const min = Number(val('set-minStock'));
   if (!isFinite(min) || min < 0) {
     toast(t('v_number', { f: t('s_default_min') }), 'warning');
@@ -1315,6 +1332,7 @@ function saveSettingsForm() {
     minStock:  min,
     lateAlert: Number(val('set-lateAlert')),
     curLabel:  val('set-curLabel'),
+    warrantyMonths: wmonths,
     docSecret: setting('docSecret')
   });
 
@@ -1431,7 +1449,8 @@ function field(label, type, value, id, opts) {
     '<input type="' + type + '"' + (id ? ' id="' + esc(id) + '"' : '') +
       (o.min !== undefined ? ' min="' + esc(o.min) + '"' : '') +
       (o.step !== undefined ? ' step="' + esc(o.step) + '"' : '') +
-      ' value="' + esc(value) + '"></div>';
+      ' value="' + esc(value) + '">' +
+    (o.hint ? '<p class="hint">' + esc(o.hint) + '</p>' : '') + '</div>';
 }
 
 /* ==========================================================================
@@ -1688,6 +1707,7 @@ document.addEventListener('click', function (ev) {
   /* --- belgeler --- */
   if (act === 'doc-invoice')  { invoiceDoc(id); return; }
   if (act === 'doc-receipt')  { receiptDoc(id); return; }
+  if (act === 'doc-warranty') { warrantyForm(id); return; }
   if (act === 'close-doc')    { closeDoc(); return; }
   if (act === 'toggle-copy')  {
     const sh = document.querySelector('.doc-host .sheet');

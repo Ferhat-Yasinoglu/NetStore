@@ -211,3 +211,102 @@ function receiptDoc(paymentId) {
     '</footer>'
   ));
 }
+/* --------------------------------------------------------------------------
+   GARANTİ BELGESİ
+
+   Satılan cihazların seri numarası, garanti süresi ve bitiş tarihi; şartlar;
+   mühür, kaşe ve doğrulama karekodu faturadakiyle aynı sistemden gelir.
+   -------------------------------------------------------------------------- */
+function warrantyDoc(saleId) {
+  const sale = saleById(saleId);
+  if (!sale) { toast(t('e_no_record'), 'warning'); return; }
+
+  const items = warrantyItems(sale);
+  if (!items.length) { toast(t('wf_none'), 'info'); return; }
+
+  const c = customerById(sale.customerId);
+  const staff = staffById(sale.staffId);
+  const end = warrantyEnd(sale);
+  const valid = end >= TODAY;
+  const left = daysBetween(TODAY, end);
+
+  const rows = items.map((x, i) =>
+    '<tr>' +
+      '<td class="c">' + num(i + 1) + '</td>' +
+      '<td><b>' + esc(x.product ? x.product.name : '—') + '</b>' +
+        '<span class="sheet-sku">' + esc(x.product ? x.product.sku : '') + ' · ' +
+        esc(x.product ? catLabel(x.product.cat) : '') +
+        (x.qty > 1 ? ' · ' + esc(t('c_qty')) + ' ' + num(x.qty) : '') + '</span></td>' +
+      '<td class="wr-serial">' + (x.serial
+        ? '<span class="mono">' + esc(x.serial) + '</span>'
+        : '<span class="sheet-empty">' + esc(t('wr_no_serial')) + '</span>') + '</td>' +
+      '<td class="c">' + esc(t('wr_months', { n: num(x.months) })) + '</td>' +
+      '<td class="e"><b>' + fmtDate(x.end) + '</b></td>' +
+    '</tr>').join('');
+
+  const bullets = (label, keys) =>
+    '<div class="wr-term"><div class="sheet-sub-h">' + esc(label) + '</div><ul>' +
+      keys.map((k) => '<li>' + esc(t(k)) + '</li>').join('') + '</ul></div>';
+
+  openDoc(docShell(
+    watermarkSvg(t('inv_copy')) +
+    sheetHeader(t('wr_title'), [
+      [t('wr_no'),    '<span class="mono">' + esc(sale.no) + '-G</span>'],
+      [t('wr_start'), fmtDate(sale.date)],
+      [t('wr_end'),   '<span class="' + (valid ? '' : 'ink-danger') + '">' + fmtDate(end) + '</span>']
+    ]) +
+
+    '<div class="sheet-parties">' +
+      partyBlock(t('inv_seller'), [
+        esc(bizName()),
+        esc(bizAddr()),
+        esc(t('inv_tax')) + ': ' + ltr(setting('tax')),
+        ltr(setting('phone'))
+      ]) +
+      partyBlock(t('inv_buyer'), [
+        esc(customerName(c)),
+        esc(L(c.addr)),
+        ltr(c.phone)
+      ]) +
+    '</div>' +
+
+    '<table class="sheet-table">' +
+      '<thead><tr>' +
+        '<th class="c">' + esc(t('inv_no_col')) + '</th>' +
+        '<th>' + esc(t('wr_device')) + '</th>' +
+        '<th>' + esc(t('wr_serial')) + '</th>' +
+        '<th class="c">' + esc(t('wr_period')) + '</th>' +
+        '<th class="e">' + esc(t('wr_end')) + '</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody>' +
+    '</table>' +
+
+    '<div class="wr-status">' +
+      '<p class="wr-left' + (valid ? '' : ' ink-danger') + '">' +
+        esc(valid ? t('wr_days_left', { n: num(left) }) : t('wr_expired')) + '</p>' +
+      '<div class="wr-stamp">' +
+        stampSvg(valid ? t('wr_valid') : t('wr_expired'), valid ? 'success' : 'danger', fmtDate(end)) +
+      '</div>' +
+    '</div>' +
+
+    '<section class="wr-terms">' +
+      '<div class="sheet-sub-h wr-terms-h">' + esc(t('wr_terms')) + '</div>' +
+      '<div class="wr-terms-grid">' +
+        bullets(t('wr_covered'),  ['wr_covered_1', 'wr_covered_2', 'wr_covered_3']) +
+        bullets(t('wr_excluded'), ['wr_excluded_1', 'wr_excluded_2', 'wr_excluded_3', 'wr_excluded_4']) +
+      '</div>' +
+      '<p class="wr-howto"><b>' + esc(t('wr_howto')) + ':</b> ' + esc(t('wr_howto_text')) + '</p>' +
+    '</section>' +
+
+    '<footer class="sheet-foot">' +
+      '<div class="sheet-signs">' +
+        '<div class="sign sign-seller"><span class="sign-line"></span>' + esc(t('wr_sign_shop')) +
+          '<em>' + esc(staffName(staff)) + '</em>' +
+          '<div class="seal-wrap">' + sealSvg() + '</div></div>' +
+        '<div class="sign"><span class="sign-line"></span>' + esc(t('wr_sign_cust')) +
+          '<em>' + esc(customerName(c)) + '</em></div>' +
+      '</div>' +
+      verifyStrip(warrantyQrText(sale), warrantyCode(sale)) +
+      '<p class="sheet-legal">' + esc(t('wr_foot')) + '</p>' +
+    '</footer>'
+  ));
+}
