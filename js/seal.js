@@ -82,6 +82,14 @@ function receiptCode(p, sale) {
   return docCode(['R', sale ? sale.no : '', isoLocal(p.date), amountKey(p.amount), p.id, docSecret()]);
 }
 
+/** Garanti belgesi kodu: satış, garanti bitişi ve seri numaraları üzerinden. */
+function warrantyCode(sale) {
+  const items = warrantyItems(sale);
+  const end = warrantyEnd(sale);
+  const serials = items.map(function (x) { return x.pid + ':' + x.months + ':' + x.serial; }).join(',');
+  return docCode(['W', sale.no, isoLocal(sale.date), end ? isoLocal(end) : '', serials, docSecret()]);
+}
+
 /** Kâğıttan okunan numara/kod: boşluk, tire, küçük harf, Fars rakamı toleranslı. */
 function cleanCode(s) {
   return String(s || '')
@@ -108,6 +116,9 @@ function verifyDoc(noRaw, codeRaw) {
   if (code && cleanCode(invoiceCode(sale)) === code) return { state: 'ok', kind: 'invoice', sale };
   const pay = code ? PAYMENTS.find((p) => p.saleId === sale.id && cleanCode(receiptCode(p, sale)) === code) : null;
   if (pay) return { state: 'ok', kind: 'receipt', sale, payment: pay };
+  if (code && warrantyItems(sale).length && cleanCode(warrantyCode(sale)) === code) {
+    return { state: 'ok', kind: 'warranty', sale };
+  }
   return { state: 'bad', kind: 'invoice', sale };
 }
 
@@ -120,6 +131,11 @@ function verifyDoc(noRaw, codeRaw) {
 function invoiceQrText(sale) {
   const st = saleTotals(sale);
   return 'NETSTORE|INV|' + sale.no + '|' + isoLocal(sale.date) + '|' + amountKey(st.total) + ' ' + currencyLabel() + '|' + invoiceCode(sale);
+}
+function warrantyQrText(sale) {
+  const end = warrantyEnd(sale);
+  return 'NETSTORE|WRNT|' + sale.no + '|' + isoLocal(sale.date) + '|' +
+    (end ? isoLocal(end) : '-') + '|' + warrantyCode(sale);
 }
 function receiptQrText(p, sale) {
   return 'NETSTORE|RCPT|' + (sale ? sale.no : '-') + '|' + isoLocal(p.date) + '|' + amountKey(p.amount) + ' ' + currencyLabel() + '|' + receiptCode(p, sale);
@@ -353,7 +369,8 @@ function runVerify() {
       '</tbody></table>';
     if (r.state === 'ok') {
       html = '<div class="alert alert-success">' + icon('check') + '<div><strong>' +
-        esc(r.kind === 'receipt' ? t('vf_ok_receipt') : t('vf_ok')) + '</strong></div></div>' + facts;
+        esc(r.kind === 'receipt' ? t('vf_ok_receipt')
+          : r.kind === 'warranty' ? t('vf_ok_warranty') : t('vf_ok')) + '</strong></div></div>' + facts;
     } else {
       html = '<div class="alert alert-danger">' + icon('alert') + '<div><strong>' + esc(t('vf_bad_code')) + '</strong>' +
         '<span class="alert-text">' + esc(t('vf_compare')) + '</span></div></div>' + facts;

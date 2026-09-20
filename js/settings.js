@@ -29,7 +29,8 @@ const SETTINGS_DEFAULTS = {
   lateAlert: 0,    /* vadeden kaç gün önce uyarılsın: 0 = yalnız gecikince */
   minStock:  5,    /* yeni üründe önerilen minimum stok */
   docSecret: '',   /* belge doğrulama anahtarı; ilk faturada üretilir (js/seal.js) */
-  curLabel:  'AFG' /* tutarın yanındaki para birimi yazısı: AFG / ؋ / Af / AFN / word */
+  curLabel:  'AFG', /* tutarın yanındaki para birimi yazısı: AFG / ؋ / Af / AFN / word */
+  warrantyMonths: 12 /* yeni üründe önerilen garanti süresi (ay); 0 = garantisiz */
 };
 
 /* Para birimi yazısı seçenekleri (arayüzdeki listeyle birebir aynı olmalı). */
@@ -90,6 +91,7 @@ function normalizeSettings(obj) {
   out.docSecret = (typeof obj.docSecret === 'string' && /^[0-9A-Z]{16,64}$/.test(obj.docSecret))
     ? obj.docSecret : '';
   out.curLabel = CURRENCY_LABELS.indexOf(obj.curLabel) >= 0 ? obj.curLabel : SETTINGS_DEFAULTS.curLabel;
+  out.warrantyMonths = intOr(obj.warrantyMonths, 0, 600, SETTINGS_DEFAULTS.warrantyMonths);
 
   return out;
 }
